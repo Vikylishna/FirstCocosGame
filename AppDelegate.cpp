@@ -1,7 +1,6 @@
 #include "AppDelegate.h"
-//#include "HelloWorldScene.h"
-
 #include "GameFieldScene.h"
+#include "TouchScene.h"
 
 USING_NS_CC;
 
@@ -44,7 +43,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
         glview = GLViewImpl::createWithRect("MyGame", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-		//��� ���� ������� � ������������ � �������� ������.
+		//Тут надо сделать в соотвекствии с размером экрана.
 		glview = GLViewImpl::create("MyGame");  //-//-//-//
 		//glview = GLViewImpl::createWithRect("SimpleGame", Rect(0, 0, 480, 320), 1.0);
 #endif
@@ -79,10 +78,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
     // create a scene. it's an autorelease object
+
+	//Запускаем сцену, создающую уровень.
 	auto scene = GameField::createScene();
 
     // run
     director->runWithScene(scene);
+
+	//Запускаем сцену с логикой касаний
+	auto scene2 = TouchScene::createScene();
+
+	// run
+	director->runWithScene(scene2);
 
     return true;
 }

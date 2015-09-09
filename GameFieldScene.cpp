@@ -1,30 +1,21 @@
 #include "GameFieldScene.h"
-#include <cstdlib>		//для rand
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
-//#include <locale>
 
 USING_NS_CC;
 
 Scene* GameField::createScene()
 {
-	// 'scene' is an autorelease object
-	auto scene = Scene::create();
-
-	// 'layer' is an autorelease object
-	auto layer = GameField::create();
-
-	// add layer as a child to scene
-	scene->addChild(layer);
-
-	// return the scene
-	return scene;
+	auto scene = Scene::create();		// 'scene' is an autorelease object	
+	auto layer = GameField::create();		// 'layer' is an autorelease object
+	scene->addChild(layer);		// add layer as a child to scene
+	return scene;		// return the scene
 }
 
 // on "init" you need to initialize your instance
 bool GameField::init()
 {
-	//setlocale(LC_ALL, "RUS");
 	//////////////////////////////
 	// 1. super init first
 	if (!Layer::init())
@@ -80,46 +71,46 @@ bool GameField::init()
 
 	//////////////////////////////////////
 	//////////////////////////////////////
-	int m = 15;		//Кол-во строк
-	int n = 20;		//Кол-во столбцов
-	int m_n = m * n;	//Общее количество
+	int m = 15;		//РљРѕР»-РІРѕ СЃС‚СЂРѕРє
+	int n = 20;		//РљРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ
+	int m_n = m * n;	//РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ
 
 
-	std::vector <int> rectangle_type(m_n);	//Вектор, содержащий типы 4-хугольника.
-	std::ifstream F;		// Поток для считывания из файла
-	F.open("rectangle_type.txt", std::ios::in);			//СЛЕДИТЬ ЗА ТЕМ, ЧТОБЫ ФАЙЛ СУЩЕСТВОВАЛ И БЫЛ НУЖНОГО РАЗМЕРА, иначе поле будет оранжевым
+	std::vector <int> rectangle_type(m_n);	//Р’РµРєС‚РѕСЂ, СЃРѕРґРµСЂР¶Р°С‰РёР№ С‚РёРїС‹ 4-С…СѓРіРѕР»СЊРЅРёРєР°.
+	std::ifstream F;		// РџРѕС‚РѕРє РґР»СЏ СЃС‡РёС‚С‹РІР°РЅРёСЏ РёР· С„Р°Р№Р»Р°
+	F.open("rectangle_type.txt", std::ios::in);			//РЎР›Р•Р”РРўР¬ Р—Рђ РўР•Рњ, Р§РўРћР‘Р« Р¤РђР™Р› РЎРЈР©Р•РЎРўР’РћР’РђР› Р Р‘Р«Р› РќРЈР–РќРћР“Рћ Р РђР—РњР•Р Рђ, РёРЅР°С‡Рµ РїРѕР»Рµ Р±СѓРґРµС‚ РѕСЂР°РЅР¶РµРІС‹Рј
 	int i;
 	for (int i = 0; (i < m_n) && (!F.eof()); i++){
 		F >> rectangle_type[i];
 	}
 	F.close();
-	//	if (i != m_n)		// Если файл закончился раньше, и часть массива rectangle_type осталась незаполненной
-	// Проверка на то, что нет непотребных символов и цифр?
+	//	if (i != m_n)		// Р•СЃР»Рё С„Р°Р№Р» Р·Р°РєРѕРЅС‡РёР»СЃСЏ СЂР°РЅСЊС€Рµ, Рё С‡Р°СЃС‚СЊ РјР°СЃСЃРёРІР° rectangle_type РѕСЃС‚Р°Р»Р°СЃСЊ РЅРµР·Р°РїРѕР»РЅРµРЅРЅРѕР№
+	// РџСЂРѕРІРµСЂРєР° РЅР° С‚Рѕ, С‡С‚Рѕ РЅРµС‚ РЅРµРїРѕС‚СЂРµР±РЅС‹С… СЃРёРјРІРѕР»РѕРІ Рё С†РёС„СЂ?
 
-	int rectWidth = visibleSize.width / n;	//Ширину делим на кол-во столбцов.
-	int rectHeight = visibleSize.height / m;	//Длину делим на кол-во строк.
+	int rectWidth = visibleSize.width / n;	//РЁРёСЂРёРЅСѓ РґРµР»РёРј РЅР° РєРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ.
+	int rectHeight = visibleSize.height / m;	//Р”Р»РёРЅСѓ РґРµР»РёРј РЅР° РєРѕР»-РІРѕ СЃС‚СЂРѕРє.
 
-	// 4 цвета и черная рамочка
-	Color4F orange(1, 0.3, 0.1, 1);		// 0 - проходимый
-	Color4F yellow(0.8, 0.8, 0.1, 1);	// 1 - проходимый
-	Color4F green(0, 0.5, 0, 1);		// 2 - непроходимый
-	Color4F gray(0.4, 0.4, 0.4, 1);		// 3 - непроходимый
-	Color4F black(0, 0, 0, 1);			// 4 - рамочка
+	// 4 С†РІРµС‚Р° Рё С‡РµСЂРЅР°СЏ СЂР°РјРѕС‡РєР°
+	Color4F orange(1, 0.3, 0.1, 1);		// 0 - РїСЂРѕС…РѕРґРёРјС‹Р№
+	Color4F yellow(0.8, 0.8, 0.1, 1);	// 1 - РїСЂРѕС…РѕРґРёРјС‹Р№
+	Color4F green(0, 0.5, 0, 1);		// 2 - РЅРµРїСЂРѕС…РѕРґРёРјС‹Р№
+	Color4F gray(0.4, 0.4, 0.4, 1);		// 3 - РЅРµРїСЂРѕС…РѕРґРёРјС‹Р№
+	Color4F black(0, 0, 0, 1);			// 4 - СЂР°РјРѕС‡РєР°
 
-	// 4 координаты четырехугольника
+	// 4 РєРѕРѕСЂРґРёРЅР°С‚С‹ С‡РµС‚С‹СЂРµС…СѓРіРѕР»СЊРЅРёРєР°
 	Vec2 rectangle[4];
 	rectangle[0] = Vec2(0, 0);
 	rectangle[1] = Vec2(0, rectHeight);
 	rectangle[2] = Vec2(rectWidth, rectHeight);
 	rectangle[3] = Vec2(rectWidth, 0);
 
-	Color4F color;		// Цвет текущего квадрата (юзается ниже в цикле)
-	// Заполняем поле игры квадратами
-	for (int i = 0; i < m; i++)		//Проходим все строки
-	for (int j = 0; j < n; j++) {		//Проходимся по столбцам
-		// Определение цвета.
-		int k = i * n + j;		// Индекс. (Кол-во нарисованных строк) * (кол-во плиток в строке) + номер плитки в текущей строке
-		switch (rectangle_type[k])		// Определяем цвет текущего квадрата
+	Color4F color;		// Р¦РІРµС‚ С‚РµРєСѓС‰РµРіРѕ РєРІР°РґСЂР°С‚Р° (СЋР·Р°РµС‚СЃСЏ РЅРёР¶Рµ РІ С†РёРєР»Рµ)
+	// Р—Р°РїРѕР»РЅСЏРµРј РїРѕР»Рµ РёРіСЂС‹ РєРІР°РґСЂР°С‚Р°РјРё
+	for (int i = 0; i < m; i++)		//РџСЂРѕС…РѕРґРёРј РІСЃРµ СЃС‚СЂРѕРєРё
+	for (int j = 0; j < n; j++) {		//РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ СЃС‚РѕР»Р±С†Р°Рј
+		// РћРїСЂРµРґРµР»РµРЅРёРµ С†РІРµС‚Р°.
+		int k = i * n + j;		// РРЅРґРµРєСЃ. (РљРѕР»-РІРѕ РЅР°СЂРёСЃРѕРІР°РЅРЅС‹С… СЃС‚СЂРѕРє) * (РєРѕР»-РІРѕ РїР»РёС‚РѕРє РІ СЃС‚СЂРѕРєРµ) + РЅРѕРјРµСЂ РїР»РёС‚РєРё РІ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРµ
+		switch (rectangle_type[k])		// РћРїСЂРµРґРµР»СЏРµРј С†РІРµС‚ С‚РµРєСѓС‰РµРіРѕ РєРІР°РґСЂР°С‚Р°
 		{
 		case 0:
 			color = orange;
@@ -135,9 +126,9 @@ bool GameField::init()
 			break;
 		}
 		auto rectNode = DrawNode::create();
-		rectNode->drawPolygon(rectangle, 4, color, 1, black);		//Создаем полигон, потом даем ему координаты
-		rectNode->setPosition(Vec2(origin.x + rectWidth*j, origin.y + rectHeight * i));	// (x - ширина, j - столбец;  y - высота, i - строка)
-		this->addChild(rectNode);		// Добавляем, как-то цепляем к сцене, фиксируем на ней. Без этого действия ничего не отображается.
+		rectNode->drawPolygon(rectangle, 4, color, 1, black);		//РЎРѕР·РґР°РµРј РїРѕР»РёРіРѕРЅ, РїРѕС‚РѕРј РґР°РµРј РµРјСѓ РєРѕРѕСЂРґРёРЅР°С‚С‹
+		rectNode->setPosition(Vec2(origin.x + rectWidth*j, origin.y + rectHeight * i));	// (x - С€РёСЂРёРЅР°, j - СЃС‚РѕР»Р±РµС†;  y - РІС‹СЃРѕС‚Р°, i - СЃС‚СЂРѕРєР°)
+		this->addChild(rectNode);		// Р”РѕР±Р°РІР»СЏРµРј, РєР°Рє-С‚Рѕ С†РµРїР»СЏРµРј Рє СЃС†РµРЅРµ, С„РёРєСЃРёСЂСѓРµРј РЅР° РЅРµР№. Р‘РµР· СЌС‚РѕРіРѕ РґРµР№СЃС‚РІРёСЏ РЅРёС‡РµРіРѕ РЅРµ РѕС‚РѕР±СЂР°Р¶Р°РµС‚СЃСЏ.
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
