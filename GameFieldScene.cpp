@@ -91,11 +91,12 @@ bool GameField::init()
 	int rectHeight = visibleSize.height / m;	//Длину делим на кол-во строк.
 
 	// 4 цвета и черная рамочка
-	Color4F orange(1, 0.3, 0.1, 1);		// 0 - проходимый
-	Color4F yellow(0.8, 0.8, 0.1, 1);	// 1 - проходимый
-	Color4F green(0, 0.5, 0, 1);		// 2 - непроходимый
-	Color4F gray(0.4, 0.4, 0.4, 1);		// 3 - непроходимый
-	Color4F black(0, 0, 0, 1);			// 4 - рамочка
+	std::vector <Color4F> colors(5);
+	colors[0] = Color4F(1, 0.3, 0.1, 1);		// 0 - проходимый, оранжевый
+	colors[1] = Color4F(0.8, 0.8, 0.1, 1);		// 1 - проходимый, желтый
+	colors[2] = Color4F(0, 0.5, 0, 1);			// 2 - непроходимый, зеленый
+	colors[3] = Color4F(0.4, 0.4, 0.4, 1);		// 3 - непроходимый, серый
+	colors[4] = Color4F(0, 0, 0, 1);			// 4 - рамочка, черный
 
 	// 4 координаты четырехугольника
 	Vec2 rectangle[4];
@@ -104,37 +105,18 @@ bool GameField::init()
 	rectangle[2] = Vec2(rectWidth, rectHeight);
 	rectangle[3] = Vec2(rectWidth, 0);
 
-	Color4F color;		// Цвет текущего квадрата (юзается ниже в цикле)
 	// Заполняем поле игры квадратами
 	for (int i = 0; i < m; i++)		//Проходим все строки
 	for (int j = 0; j < n; j++) {		//Проходимся по столбцам
 		// Определение цвета.
 		int k = i * n + j;		// Индекс. (Кол-во нарисованных строк) * (кол-во плиток в строке) + номер плитки в текущей строке
-		switch (rectangle_type[k])		// Определяем цвет текущего квадрата
-		{
-		case 0:
-			color = orange;
-			break;
-		case 1:
-			color = yellow;
-			break;
-		case 2:
-			color = green;
-			break;
-		case 3:
-			color = gray;
-			break;
-		}
+		//rectangle_type[k] - цвет текущей плитки
 		auto rectNode = DrawNode::create();
-		rectNode->drawPolygon(rectangle, 4, color, 1, black);		//Создаем полигон, потом даем ему координаты
+		rectNode->drawPolygon(rectangle, 4, colors[rectangle_type[k]], 1, colors[4]);		//Создаем полигон, потом даем ему координаты
 		rectNode->setPosition(Vec2(origin.x + rectWidth*j, origin.y + rectHeight * i));	// (x - ширина, j - столбец;  y - высота, i - строка)
 		this->addChild(rectNode);		// Добавляем, как-то цепляем к сцене, фиксируем на ней. Без этого действия ничего не отображается.
 	}
-
 	///////////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////
-	//touch
-
 
 	return true;
 }
