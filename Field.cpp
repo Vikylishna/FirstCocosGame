@@ -1,19 +1,23 @@
 #include "Field.h"
 #include <fstream>
 
-int Field::get_m(){
+int Field::get_m()
+{
 	return m;
 }
 
-int Field::get_n(){
+int Field::get_n()
+{
 	return n;
 } 
 
-int Field::get_value(int i, int j){
+int Field::get_value(int i, int j)
+{
 	return field[i][j];
 }
 
-Field::Field(){
+Field::Field()
+{
 	std::ifstream F1;		// Поток для считывания из файла размера поля
 	F1.open("size_field.txt", std::ios::in);
 	F1 >> m;
@@ -25,11 +29,11 @@ Field::Field(){
 
 	field.resize(m);
 	// Заполняем поле Field типами плиток
-	for (int i = 0; i < m; i++){
+	for (int i = 0; i < m; i++)
+	{
 		field[i].resize(n);
-		for (int j = 0; (j < n) && (!F.eof()); j++){
+		for (int j = 0; (j < n) && (!F.eof()); j++)
 			F >> field[i][j];
-		}
 	}
 	F.close();
 }

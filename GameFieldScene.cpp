@@ -3,6 +3,7 @@
 #include "field.h"
 #include "functions.h"
 
+
 USING_NS_CC;
 
 Scene* GameField::createScene()
@@ -35,6 +36,7 @@ bool GameField::init()
 	Field field;		//!!!!!!!!!!!!!!!!!
 
 	std::vector<std::string> filename(4);			//!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 	fill_arr_filename(filename);		// Вектор содержащий имена файлов, из которых мы создаем спрайты
 
 	int rectWidth = visibleSize.width / field.get_n();	//Ширину делим на кол-во столбцов. x
@@ -42,12 +44,33 @@ bool GameField::init()
 
 	// Заполняем поле игры плитками
 	for (int i = 0; i < field.get_m(); i++)		//Проходим все строки
-		for (int j = 0; j < field.get_n(); j++) {		//Проходимся по столбцам
+		for (int j = 0; j < field.get_n(); j++) 
+		{		//Проходимся по столбцам
 			auto sprite1 = Sprite::create(filename[field.get_value(i, j)], Rect(0, 0, rectWidth - 2, rectHeight - 2));	//("mysprite.png", Rect(0,0,rectWidth,40))
 			sprite1->setAnchorPoint(Vec2(0, 0));
 			sprite1->setPosition(origin + Point(1,1) + Point(rectWidth*j, rectHeight * i));		//(x - ширина, j - столбец;  y - высота, i - строка)
 			addChild(sprite1, 10);
 		}
 
+
+	///////////////////////////////////////////////////////////////////
+	///
+	///  Touch
+	///
+	///////////////////////////////////////////////////////////////////
+
+	auto mouse_listener = EventListenerMouse::create();
+	mouse_listener->onMouseUp = CC_CALLBACK_1(GameField::onMouseUp, this);
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+
 	return true;
+}
+
+void GameField::onMouseUp(Event *event)
+{// Тут будет что-то другое. Я просто смотрю как оно работает.
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	auto sprite = Sprite::create("wall1.jpg");
+	sprite->setAnchorPoint(Vec2(0, 0));
+	sprite->setPosition(origin + Point(80, 80));// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
+	addChild(sprite, 12);
 }

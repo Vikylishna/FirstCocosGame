@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include "GameFieldScene.h"
 
+
 USING_NS_CC;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(480, 320);
@@ -77,10 +78,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
 
+
 	auto scene = GameField::createScene();		// Создание сцены.
     director->runWithScene(scene);				//Запуск.
 
-
+	// Event
+//	auto listener = EventListenerTouchOneByOne::create();
+//	_mouseListener = EventListenerMouse::create();
 
 
     return true;

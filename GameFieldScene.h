@@ -10,8 +10,9 @@ public:
 
 	virtual bool init();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(GameField);
+	void GameField::onMouseUp(cocos2d::Event *event);
+
+	CREATE_FUNC(GameField);	// implement the "static create()" method manually
 };
 
 #endif // __HELLOWORLD_SCENE_H__
