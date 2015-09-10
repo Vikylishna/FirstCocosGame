@@ -1,8 +1,7 @@
 #include "GameFieldScene.h"
-#include <fstream>
 #include <string>
-#include <field.h>
-#include <functions.h>
+#include "field.h"
+#include "functions.h"
 
 USING_NS_CC;
 
@@ -41,26 +40,9 @@ bool GameField::init()
 	int rectWidth = visibleSize.width / field.get_n();	//Ширину делим на кол-во столбцов. x
 	int rectHeight = visibleSize.height / field.get_m();	//Длину делим на кол-во строк. y
 
-//	std::string filename;		//Название файла с картинкой
 	// Заполняем поле игры плитками
 	for (int i = 0; i < field.get_m(); i++)		//Проходим все строки
 		for (int j = 0; j < field.get_n(); j++) {		//Проходимся по столбцам
-	/*		switch (field.get_value(i, j))		// Определяем картинку, загружаемую текущей плитки
-			{
-			case 0:
-				filename = "grass1.jpg";	// 0 - проходимый
-				break;
-			case 1:
-				filename = "grass2.jpg";	// 1 - проходимый
-				break;
-			case 2:
-				filename = "wall1.jpg";		// 2 - непроходимый
-				break;
-			case 3:
-				filename = "wall2.jpg";		// 3 - непроходимый
-				break;
-			}*/
-
 			auto sprite1 = Sprite::create(filename[field.get_value(i, j)], Rect(0, 0, rectWidth - 2, rectHeight - 2));	//("mysprite.png", Rect(0,0,rectWidth,40))
 			sprite1->setAnchorPoint(Vec2(0, 0));
 			sprite1->setPosition(origin + Point(1,1) + Point(rectWidth*j, rectHeight * i));		//(x - ширина, j - столбец;  y - высота, i - строка)

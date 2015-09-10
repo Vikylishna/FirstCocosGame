@@ -1,5 +1,4 @@
-#include "cocos2d.h"
-//#include <vector>
+#include <vector>
 
 class Field
 {
@@ -13,5 +12,3 @@ private:
 	int m;		// Кол-во строк
 	int n;		// Кол-во столбцов
 };
-
-//#endif // __HELLOWORLD_SCENE_H__
