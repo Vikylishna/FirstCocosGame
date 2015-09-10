@@ -2,8 +2,8 @@
 #include <string>
 #include "field.h"
 #include "functions.h"
-
-
+#include <algorithm>
+#define COCOS2D_DEBUG 1
 USING_NS_CC;
 
 Scene* GameField::createScene()
@@ -44,14 +44,27 @@ bool GameField::init()
 
 	// Заполняем поле игры плитками
 	for (int i = 0; i < field.get_m(); i++)		//Проходим все строки
-		for (int j = 0; j < field.get_n(); j++) 
+	{
+		for (int j = 0; j < field.get_n(); j++)
 		{		//Проходимся по столбцам
 			auto sprite1 = Sprite::create(filename[field.get_value(i, j)], Rect(0, 0, rectWidth - 2, rectHeight - 2));	//("mysprite.png", Rect(0,0,rectWidth,40))
 			sprite1->setAnchorPoint(Vec2(0, 0));
-			sprite1->setPosition(origin + Point(1,1) + Point(rectWidth*j, rectHeight * i));		//(x - ширина, j - столбец;  y - высота, i - строка)
+			sprite1->setPosition(origin + Point(1, 1) + Point(rectWidth*j, rectHeight * i));		//(x - ширина, j - столбец;  y - высота, i - строка)
 			addChild(sprite1, 10);
 		}
+	}
 
+	// Добавим спрайт персонажа
+	auto cat_sprite = Sprite::create("cat.png");
+	double coeff1 = ((double)rectWidth * 0.75) / ((double)cat_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeff2 = ((double)rectWidth * 0.75) / ((double)cat_sprite->getBoundingBox().size.height);
+	double coeff = std::min(coeff1, coeff2);
+	//log("COEFF = %f", cat_sprite->getBoundingBox().size.width);
+	cat_sprite->setScale(coeff1);		//Определили и задали требуемый размер
+	cat_sprite->setAnchorPoint(Vec2(0, 0));
+	cat_sprite->setPosition(origin + Point(1, 1));// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
+	addChild(cat_sprite, 12);
+	CCLOG("Preceding with blanks: %10d", 1977);
 
 	///////////////////////////////////////////////////////////////////
 	///
@@ -69,8 +82,9 @@ bool GameField::init()
 void GameField::onMouseUp(Event *event)
 {// Тут будет что-то другое. Я просто смотрю как оно работает.
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	auto sprite = Sprite::create("wall1.jpg");
-	sprite->setAnchorPoint(Vec2(0, 0));
-	sprite->setPosition(origin + Point(80, 80));// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
-	addChild(sprite, 12);
+	auto cat_sprite = Sprite::create("cat.png");
+	cat_sprite->setScale(0.0);
+	cat_sprite->setAnchorPoint(Vec2(0, 0));
+	cat_sprite->setPosition(origin + Point(80, 80));// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
+	addChild(cat_sprite, 12);
 }
