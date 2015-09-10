@@ -1,6 +1,5 @@
 #include "AppDelegate.h"
 #include "GameFieldScene.h"
-#include "TouchScene.h"
 
 USING_NS_CC;
 
@@ -77,23 +76,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     register_all_packages();
 
-    // create a scene. it's an autorelease object
 
-	//Запускаем сцену, создающую уровень.
-	auto scene = GameField::createScene();
+	auto scene = GameField::createScene();		// Создание сцены.
+    director->runWithScene(scene);				//Запуск.
 
-    // run
-    director->runWithScene(scene);
 
-	//Запускаем сцену с логикой касаний
-	auto scene2 = TouchScene::createScene();
 
-	// run
-	director->runWithScene(scene2);
 
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This function will be called when the app is inactive. When comes a phone call,it's be invoked too
 void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
