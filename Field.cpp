@@ -1,19 +1,23 @@
 #include "Field.h"
 #include <fstream>
 
-int Field::get_m()
+int Field::get_m()		// Кол-во плиток в высоту (кол-во строк)
 {
 	return m;
 }
 
-int Field::get_n()
+int Field::get_n()		// Кол-во плиток в длину (кол-во столбцов)
 {
 	return n;
 } 
 
-int Field::get_value(int i, int j)
+int Field::get_value(int y, int x)
 {
-	return field[i][j];
+	return field[y][x];
+}
+
+bool Field::passable(int y, int x){
+	return (field[y][x] == 0 || field[y][x] == 1) ? true : false;
 }
 
 Field::Field()
@@ -36,4 +40,8 @@ Field::Field()
 			F >> field[i][j];
 	}
 	F.close();
+}
+
+bool find_the_shortest_path(int y1, int x1, int y2, int x2){		// Возвращает true, если существует путь из (x1,y1), (x2,y2).
+	return true;
 }

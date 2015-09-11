@@ -2,9 +2,14 @@
 #define __GAMEFIELD_SCENE_H__
 
 #include "cocos2d.h"
+#include "field.h"
 
 class GameField : public cocos2d::Layer
 {
+	Field gameField;
+	int tileWidth;
+	int tileHeight;
+	cocos2d::Vec2 origin;
 public:
 	static cocos2d::Scene* createScene();
 
