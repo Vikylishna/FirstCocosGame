@@ -82,7 +82,6 @@ void GameField::onMouseUp(Event *event)
 	int coordOfTileY = (e->getCursorY() - origin.y) / tileHeight;
 	//Смотрим, проходимая ли она.
 	if ((coordOfTileY >= gameField.get_m()) || (coordOfTileX >= gameField.get_n()) || !(gameField.passable(coordOfTileY, coordOfTileX))) return;		//Если координата проходимая и если мы попали в поле.
-
 	if (this->getChildByTag(4) == NULL){		//Если объект с тегом 4 не существует, а это cat, добавляем его в сцену.
 		
 		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
@@ -96,11 +95,16 @@ void GameField::onMouseUp(Event *event)
 		addChild(cat_sprite, 12);
 		return;
 	}
-
-	//int y1 = ;
-	//int x1 = ;
-	//if (gameField.find_the_shortest_path(y1, x1, coordOfTileY, coordOfTileX))
-		// Перемещаем cat_sprite в новую позицию.
-
+	Vec2 cat_position = (this->getChildByTag(4))->getPosition();
+	int currentCoordOfTileX = (cat_position.x - origin.x) / tileWidth;
+	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
+	//log("current cat x = %d y = %d", currentCoordOfTileX, currentCoordOfTileY);
+	//log("new cat x = %d y = %d", coordOfTileX, coordOfTileY);
+	//if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX))
+	if (true)
+	{
+		int x = 1;
+		//(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (currentCoordOfTileY * tileHeight + tileHeight / 2));// Перемещаем cat_sprite в новую позицию.
+	}
 
 }
