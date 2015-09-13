@@ -73,17 +73,19 @@ bool GameField::init()
 }
 
 void GameField::onMouseUp(Event *event)
-{// Тут будет что-то другое. Я просто смотрю как оно работает.
+{
 	EventMouse* e = (EventMouse*)event;
 //	Point click = Point(e->getCursorX(), e->getCursorY()) - Director::getInstance()->getVisibleOrigin();
 
 	// Рассчитываем, в какую плитку попали
 	int coordOfTileX = (e->getCursorX() - origin.x) / tileWidth;
 	int coordOfTileY = (e->getCursorY() - origin.y) / tileHeight;
+
 	//Смотрим, проходимая ли она.
-	if ((coordOfTileY >= gameField.get_m()) || (coordOfTileX >= gameField.get_n()) || !(gameField.passable(coordOfTileY, coordOfTileX))) return;		//Если координата проходимая и если мы попали в поле.
-	if (this->getChildByTag(4) == NULL){		//Если объект с тегом 4 не существует, а это cat, добавляем его в сцену.
-		
+	if ((coordOfTileY >= gameField.get_m()) || (coordOfTileX >= gameField.get_n()) || !(gameField.passable(coordOfTileY, coordOfTileX))) return;		//Если координата проходимая и если мы попали в поле, продолжаем
+	
+	if (this->getChildByTag(4) == NULL)		//Если объект с тегом 4 не существует, а это cat, добавляем его в сцену.
+	{
 		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
 		//Изменим сделаем: сделаем нужного зазмера.
 		double coeff1 = ((double)tileWidth * 0.75) / ((double)cat_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
@@ -95,16 +97,14 @@ void GameField::onMouseUp(Event *event)
 		addChild(cat_sprite, 12);
 		return;
 	}
-	Vec2 cat_position = (this->getChildByTag(4))->getPosition();
+	Vec2 cat_position = (this->getChildByTag(4))->getPosition();		// Получаем текущие координаты кота.
 	int currentCoordOfTileX = (cat_position.x - origin.x) / tileWidth;
 	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
-	//log("current cat x = %d y = %d", currentCoordOfTileX, currentCoordOfTileY);
-	//log("new cat x = %d y = %d", coordOfTileX, coordOfTileY);
-	//if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX))
-	if (true)
+	log("current cat x = %d y = %d", currentCoordOfTileX, currentCoordOfTileY);
+	log("new cat x = %d y = %d", coordOfTileX, coordOfTileY);
+	if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX))		// Если путь есть
 	{
-		int x = 1;
-		//(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (currentCoordOfTileY * tileHeight + tileHeight / 2));// Перемещаем cat_sprite в новую позицию.
+		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Перемещаем cat_sprite в новую позицию.
 	}
 
 }

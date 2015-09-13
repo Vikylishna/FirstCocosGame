@@ -42,6 +42,6 @@ Field::Field()
 	F.close();
 }
 
-bool find_the_shortest_path(int y1, int x1, int y2, int x2){		// Возвращает true, если существует путь из (x1,y1), (x2,y2).
+bool Field::find_the_shortest_path(int y1, int x1, int y2, int x2){		// Возвращает true, если существует путь из (x1,y1), (x2,y2).
 	return true;
 }
