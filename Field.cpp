@@ -1,6 +1,7 @@
 #include "Field.h"
 #include <fstream>
 #include <queue>
+#include "cocos2d.h"
 
 int Field::get_m()		// Кол-во плиток в высоту (кол-во строк)
 {
@@ -106,17 +107,37 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 		int current = path[y][x];
 		while (current != 0)
 		{
-			current = path[y][x];		// Сохраняем текушую длину пути.
 			shortest_path.push_back(std::pair<int, int>(y, x));		// Записываем последнюю точку пути в вектор shortest_path
 			// Ищем предыдущую точку пути. Точку, значение в которой == current - 1
 			if ((y + 1 >= 0) && (y + 1 < m) && (path[y + 1][x] == current - 1))
 			{
-				
+				y++;
+				//current--;
 			}
-
+			else if ((x + 1 >= 0) && (x + 1 < n) && (path[y][x + 1] == current - 1))
+			{
+				x++;
+				//current--;
+			}
+			else if ((y - 1 >= 0) && (y - 1 < m) && (path[y - 1][x] == current - 1))
+			{
+				y--;
+				//current--;
+			}
+			else if ((x - 1 >= 0) && (x - 1 < n) && (path[y][x - 1] == current - 1))
+			{
+				x--;
+				//current--;
+			}
+			// Нашли точку.
+			current = path[y][x];		// Сохраняем новую длину пути.
 		}
+		shortest_path.push_back(std::pair<int, int>(y1, x1));		// Заталкиваем последнюю.
 	}
+//	for (int i = 0; i < shortest_path.size(); i++)
+//		cocos2d::log("y = %d, x = %d", shortest_path[i].first, shortest_path[i].second);
 
+	//log("current cat x = %d y = %d", 1, 2);
 
 /*	std::ofstream F("test.txt", std::ios::out);
 	for (int i = 0; i < m; i++)
@@ -128,5 +149,6 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 		F << '\n';
 	}
 	F.close();*/
+
 	return shortest_path;
 }

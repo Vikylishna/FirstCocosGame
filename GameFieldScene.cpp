@@ -1,11 +1,8 @@
 #include "GameFieldScene.h"
-
 #include <string>
-//#include "field.h"
-#include "functions.h"
 #include "functions.h"
 #include <algorithm>
-#include <algorithm>
+
 //#include "field.h"
 //#define COCOS2D_DEBUG 1
 USING_NS_CC;
@@ -103,7 +100,7 @@ void GameField::onMouseUp(Event *event)
 	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
 	log("current cat x = %d y = %d", currentCoordOfTileX, currentCoordOfTileY);
 	log("new cat x = %d y = %d", coordOfTileX, coordOfTileY);
-	if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX).size() == 0)		// Если путь есть
+	if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX).size() != 0)		// Если путь есть
 	{
 		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Перемещаем cat_sprite в новую позицию.
 	}
