@@ -6,7 +6,7 @@
 
 class GameField : public cocos2d::Layer
 {
-	Field gameField;
+	Field gameField;	// Нужно ли сделать эту переменную глобальной/синглтоном? Либо оставить тут.
 	int tileWidth;
 	int tileHeight;
 	cocos2d::Vec2 origin;
