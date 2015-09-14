@@ -19,8 +19,8 @@ private:
 	int m;		// Кол-во строк
 	int n;		// Кол-во столбцов
 	std::vector<std::vector<int>> field;	//Вектор, содержащий типы плиток поля.
-	void add_vertex_in_queue_and_update_ways(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & ways, int new_y, int new_x, int old_y, int old_x);
-	void add_all_adjacent_vertex_in_queue_and_update_ways(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & ways, int y, int x);
+	void add_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x);
+	void add_all_adjacent_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int y, int x);
 };
 
 #endif /* FIELD_H */
