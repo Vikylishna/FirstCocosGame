@@ -8,17 +8,17 @@ class Field
 {
 public:
 	Field();
-	int get_m();			// Кол-во плиток в высоту (кол-во строк)
-	int get_n();			// Кол-во плиток в длину (кол-во столбцов)
+	int get_m();			// РљРѕР»-РІРѕ РїР»РёС‚РѕРє РІ РІС‹СЃРѕС‚Сѓ (РєРѕР»-РІРѕ СЃС‚СЂРѕРє)
+	int get_n();			// РљРѕР»-РІРѕ РїР»РёС‚РѕРє РІ РґР»РёРЅСѓ (РєРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ)
 	int get_value(int y, int x);
-	bool check_passible_and_correct(int y1, int x1);		// Проверяет клетку на проходимость и на то, что методу передали годные координаты. Возвращает 1, если все ок.
+	bool check_passible_and_correct(int y1, int x1);		// РџСЂРѕРІРµСЂСЏРµС‚ РєР»РµС‚РєСѓ РЅР° РїСЂРѕС…РѕРґРёРјРѕСЃС‚СЊ Рё РЅР° С‚Рѕ, С‡С‚Рѕ РјРµС‚РѕРґСѓ РїРµСЂРµРґР°Р»Рё РіРѕРґРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹. Р’РѕР·РІСЂР°С‰Р°РµС‚ 1, РµСЃР»Рё РІСЃРµ РѕРє.
 
-	// Возвращает путь, если он существует (из (x1,y1), (x2,y2)).  Если не существует->пустой вектор.
+	// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСѓС‚СЊ, РµСЃР»Рё РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚ (РёР· (x1,y1), (x2,y2)).  Р•СЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚->РїСѓСЃС‚РѕР№ РІРµРєС‚РѕСЂ.
 	std::vector<std::pair<int, int>> find_the_shortest_path(int y1, int x1, int y2, int x2);
 private:
-	int m;		// Кол-во строк
-	int n;		// Кол-во столбцов
-	std::vector<std::vector<int>> field;	//Вектор, содержащий типы плиток поля.
+	int m;		// РљРѕР»-РІРѕ СЃС‚СЂРѕРє
+	int n;		// РљРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ
+	std::vector<std::vector<int>> field;	//Р’РµРєС‚РѕСЂ, СЃРѕРґРµСЂР¶Р°С‰РёР№ С‚РёРїС‹ РїР»РёС‚РѕРє РїРѕР»СЏ.
 	void add_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x);
 	void add_all_adjacent_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int y, int x);
 };

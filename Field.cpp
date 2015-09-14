@@ -135,7 +135,7 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 		shortest_path.push_back(std::pair<int, int>(y1, x1));		// Заталкиваем последнюю.
 	}
 //	for (int i = 0; i < shortest_path.size(); i++)
-//		cocos2d::log("y = %d, x = %d", shortest_path[i].first, shortest_path[i].second);
+//cocos2d::log("y = %d, x = %d", shortest_path[i].first, shortest_path[i].second);
 
 	//log("current cat x = %d y = %d", 1, 2);
 
