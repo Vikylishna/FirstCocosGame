@@ -104,5 +104,4 @@ void GameField::onMouseUp(Event *event)
 	{
 		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Перемещаем cat_sprite в новую позицию.
 	}
-
 }
