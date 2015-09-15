@@ -69,20 +69,41 @@ bool GameField::init()
 	return true;
 }
 
+// Сбрасывает coordsPreviousClickX и coordsPreviousClickY и удаляет путь, проложенный спрайтами от точки до точки.
+void GameField::resetCoordinatesClickAndDeletePath()
+{
+	coordsPreviousClickX = -1;
+	coordsPreviousClickY = -1;
+	while (this->getChildByTag(13) != NULL)		// Не уверена, что это хорошо.
+		this->removeChildByTag(13);
+	//this->removeChildByName("path");
+	//cocos2d::Vector<Node *> vecChildren = this->getChildren();
+	//for (Vector<Node *>::iterator iter = vecChildren.begin(); iter != vecChildren.end(); iter++)
+	//iter->getTag()
+	//if (iter->get) 
+	//CCNode* node = NULL;
+	//CCARRAY_FOREACH(this->getChildren(), node)
+}
+
 void GameField::onMouseUp(Event *event)
 {
 	EventMouse* e = (EventMouse*)event;
 //	Point click = Point(e->getCursorX(), e->getCursorY()) - Director::getInstance()->getVisibleOrigin();
 
-	// Рассчитываем, в какую плитку попали
+	// 1. Рассчитываем, в какую плитку попали
 	int coordOfTileX = (e->getCursorX() - origin.x) / tileWidth;
 	int coordOfTileY = (e->getCursorY() - origin.y) / tileHeight;
 
-	//Смотрим, проходимая ли она.
-	if (!gameField.check_passible_and_correct(coordOfTileY, coordOfTileX)) return;
-	//if ((coordOfTileY >= gameField.get_m()) || (coordOfTileX >= gameField.get_n()) || !(gameField.passable(coordOfTileY, coordOfTileX))) return;		//Если координата проходимая и если мы попали в поле, продолжаем
-	
-	if (this->getChildByTag(4) == NULL)		//Если объект с тегом 4 не существует, а это cat, добавляем его в сцену.
+	// 2. Смотрим, проходимая ли она.
+	if (!gameField.check_passible_and_correct(coordOfTileY, coordOfTileX))
+	{
+		// Сюда идти мы не можем.
+		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
+		resetCoordinatesClickAndDeletePath();
+	}
+
+	// 3. Если объект с тегом 4 не существует, а это наш персонаж - cat, добавляем его в сцену.
+	if (this->getChildByTag(4) == NULL)
 	{
 		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
 		//Изменим сделаем: сделаем нужного зазмера.
@@ -92,16 +113,46 @@ void GameField::onMouseUp(Event *event)
 		cat_sprite->setScale(coeff1);		//Определили и задали требуемый размер
 		cat_sprite->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Помещаем в место клика
 		cat_sprite->setTag(4);		// Назначаем тег 4
-		addChild(cat_sprite, 12);
+		addChild(cat_sprite, 15);
 		return;
 	}
+
+	// 4. Если координаты нажатой кнопки совпадают с предыдущими (повторное нажатие на одно и то же место), перемещаем персонажа-кота на новое место.
+	if ((coordOfTileX == coordsPreviousClickX) && (coordOfTileY == coordsPreviousClickY))
+	{
+		// Перемещаем cat_sprite в новую позицию.
+		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));
+		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
+		resetCoordinatesClickAndDeletePath();
+	}
+
+	// 5. Если координаты не совпадают с предыдущими, ищем путь и показываем его игроку.
+	//Сбрасываем предыдущий клик. И удаляем путь, если он есть.
+	resetCoordinatesClickAndDeletePath();
+
 	Vec2 cat_position = (this->getChildByTag(4))->getPosition();		// Получаем текущие координаты кота.
 	int currentCoordOfTileX = (cat_position.x - origin.x) / tileWidth;
 	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
-	log("current cat x = %d y = %d", currentCoordOfTileX, currentCoordOfTileY);
-	log("new cat x = %d y = %d", coordOfTileX, coordOfTileY);
-	if (gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX).size() != 0)		// Если путь есть
+
+	// Ищем кратчайший путь
+	std::vector<std::pair<int, int>> shortest_path = gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX);
+	if (shortest_path.size() != 0)		// Если путь есть
 	{
-		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Перемещаем cat_sprite в новую позицию.
+		coordsPreviousClickX = coordOfTileX;		// Меняем координаты предыдущего клика.
+		coordsPreviousClickY = coordOfTileY;
+		// "Рисуем" путь.
+		for (std::vector<std::pair<int, int>>::size_type i = 0; i < shortest_path.size(); i++)
+		{
+			shortest_path[i].first;
+			auto path_sprite = Sprite::create("circle.png");	// Спрайт пути.
+			//Изменим сделаем: сделаем нужного зазмера.
+			double coeff1 = ((double)tileWidth * 0.4) / ((double)path_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
+			double coeff2 = ((double)tileHeight * 0.4) / ((double)path_sprite->getBoundingBox().size.height);
+			double coeff = std::min(coeff1, coeff2);
+			path_sprite->setScale(coeff1);		//Определили и задали требуемый размер
+			path_sprite->setPosition((shortest_path[i].second * tileWidth + tileWidth / 2), (shortest_path[i].first * tileHeight + tileHeight / 2));		// Помещаем в место клика
+			path_sprite->setTag(13);		// Назначаем тег 13. По нему будем удалять.
+			addChild(path_sprite, 13);
+		}
 	}
 }
