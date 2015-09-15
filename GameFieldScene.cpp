@@ -84,6 +84,20 @@ void GameField::resetCoordinatesClickAndDeletePath()
 	}
 }
 
+// c - коэффициент. Во сколько раз картинка будет больше плитки.
+void GameField::addSprite(int coordOfTileX, int coordOfTileY, double c, int tag, int zOrder)
+{
+	auto sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
+	//Изменим сделаем: сделаем нужного зазмера.
+	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeff2 = ((double)tileHeight * c) / ((double)sprite->getBoundingBox().size.height);
+	double coeff = std::min(coeff1, coeff2);
+	sprite->setScale(coeff1);		//Определили и задали требуемый размер
+	sprite->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));	// Задаем координаты.
+	sprite->setTag(tag);		// Назначаем тег
+	addChild(sprite, zOrder);
+}
+
 void GameField::onMouseUp(Event *event)
 {
 	EventMouse* e = (EventMouse*)event;
@@ -99,12 +113,13 @@ void GameField::onMouseUp(Event *event)
 		// Сюда идти мы не можем.
 		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
 		resetCoordinatesClickAndDeletePath();
+		return;
 	}
 
 	// 3. Если объект с тегом 4 не существует, а это наш персонаж - cat, добавляем его в сцену.
 	if (this->getChildByTag(4) == NULL)
 	{
-		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
+/*		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
 		//Изменим сделаем: сделаем нужного зазмера.
 		double coeff1 = ((double)tileWidth * 0.75) / ((double)cat_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
 		double coeff2 = ((double)tileHeight * 0.75) / ((double)cat_sprite->getBoundingBox().size.height);
@@ -112,7 +127,9 @@ void GameField::onMouseUp(Event *event)
 		cat_sprite->setScale(coeff1);		//Определили и задали требуемый размер
 		cat_sprite->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Помещаем в место клика
 		cat_sprite->setTag(4);		// Назначаем тег 4
-		addChild(cat_sprite, 15);
+		addChild(cat_sprite, 15);*/
+
+		addSprite(coordOfTileX, coordOfTileY, 0.75, 4, 15);
 		return;
 	}
 
@@ -142,8 +159,7 @@ void GameField::onMouseUp(Event *event)
 		// "Рисуем" путь.
 		for (std::vector<std::pair<int, int>>::size_type i = 0; i < shortest_path.size(); i++)
 		{
-			shortest_path[i].first;
-			auto path_sprite = Sprite::create("circle.png");	// Спрайт пути.
+			/*auto path_sprite = Sprite::create("circle.png");	// Спрайт пути.
 			//Изменим сделаем: сделаем нужного зазмера.
 			double coeff1 = ((double)tileWidth * 0.4) / ((double)path_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
 			double coeff2 = ((double)tileHeight * 0.4) / ((double)path_sprite->getBoundingBox().size.height);
@@ -151,7 +167,9 @@ void GameField::onMouseUp(Event *event)
 			path_sprite->setScale(coeff1);		//Определили и задали требуемый размер
 			path_sprite->setPosition((shortest_path[i].second * tileWidth + tileWidth / 2), (shortest_path[i].first * tileHeight + tileHeight / 2));		// Помещаем в место клика
 			path_sprite->setTag(13);		// Назначаем тег 13. По нему будем удалять.
-			addChild(path_sprite, 13);
+			addChild(path_sprite, 13);*/
+
+			addSprite(shortest_path[i].second, shortest_path[i].first, 0.3, 13, 13);
 		}
 	}
 }

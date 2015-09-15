@@ -18,7 +18,9 @@ public:
 
 	virtual bool init();
 
-	void GameField::onMouseUp(cocos2d::Event *event);
+	void onMouseUp(cocos2d::Event *event);
+
+	void addSprite(int coordOfTileX, int coordOfTileY, double c, int tag, int zOrder);		// c - коэффициент. Во сколько раз картинка будет больше плитки.
 
 	CREATE_FUNC(GameField);	// implement the "static create()" method manually
 };
