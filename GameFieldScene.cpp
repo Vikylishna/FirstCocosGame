@@ -3,8 +3,6 @@
 #include "functions.h"
 #include <algorithm>
 
-//#include "field.h"
-//#define COCOS2D_DEBUG 1
 USING_NS_CC;
 
 Scene* GameField::createScene()
