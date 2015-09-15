@@ -82,10 +82,6 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	auto scene = GameField::createScene();		// Создание сцены.
     director->runWithScene(scene);				//Запуск.
 
-	// Event
-//	auto listener = EventListenerTouchOneByOne::create();
-//	_mouseListener = EventListenerMouse::create();
-
 
     return true;
 }

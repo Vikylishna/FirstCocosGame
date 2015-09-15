@@ -7,9 +7,9 @@
 class GameField : public cocos2d::Layer
 {
 	Field gameField;	// Нужно ли сделать эту переменную глобальной/синглтоном? Либо оставить тут.
-	int tileWidth;
-	int tileHeight;
-	int coordsPreviousClickX = -1;
+	int tileWidth;		// Ширина плитки
+	int tileHeight;		// Длина плитки
+	int coordsPreviousClickX = -1;		// Координаты предыдущего клика (точка, в которую уже продожен путь)
 	int coordsPreviousClickY = -1;
 	cocos2d::Vec2 origin;
 	void resetCoordinatesClickAndDeletePath();		// Сбрасывает coordsPreviousClickX и coordsPreviousClickY и удаляет путь, проложенный спрайтами от точки до точки.

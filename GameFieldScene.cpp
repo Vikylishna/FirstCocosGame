@@ -72,15 +72,16 @@ void GameField::resetCoordinatesClickAndDeletePath()
 {
 	coordsPreviousClickX = -1;
 	coordsPreviousClickY = -1;
-	while (this->getChildByTag(13) != NULL)		// Не уверена, что это хорошо.
-		this->removeChildByTag(13);
-	//this->removeChildByName("path");
-	//cocos2d::Vector<Node *> vecChildren = this->getChildren();
-	//for (Vector<Node *>::iterator iter = vecChildren.begin(); iter != vecChildren.end(); iter++)
-	//iter->getTag()
-	//if (iter->get) 
-	//CCNode* node = NULL;
-	//CCARRAY_FOREACH(this->getChildren(), node)
+
+//	while (this->getChildByTag(13) != NULL)
+//		this->removeChildByTag(13);
+
+	cocos2d::Vector<Node *> vecChildren = this->getChildren();
+	for (Vector<Node *>::iterator iter = vecChildren.begin(); iter != vecChildren.end(); iter++){
+		int tag = (*(*iter)).getTag();
+		if (tag == 13)
+			this->removeChild(*iter, true);
+	}
 }
 
 void GameField::onMouseUp(Event *event)
