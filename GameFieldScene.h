@@ -3,16 +3,24 @@
 
 #include "cocos2d.h"
 #include "field.h"
+//#include <CCGeometry.h>
 
 class GameField : public cocos2d::Layer
 {
-	Field gameField;	// Нужно ли сделать эту переменную глобальной/синглтоном? Либо оставить тут.
+	Field gameField;
+	//Длина и ширина плитки (ее размеры).
+	//cocos2d::Size sizetile;
+	
 	int tileWidth;		// Ширина плитки
 	int tileHeight;		// Длина плитки
-	int coordsPreviousClickX = -1;		// Координаты предыдущего клика (точка, в которую уже продожен путь)
-	int coordsPreviousClickY = -1;
+	// Координаты предыдущего клика (точка, в которую уже продожен путь)
+	cocos2d::Vec2 coordsPreviousClick;
+	//int coordsPreviousClickX = -1;		// Координаты предыдущего клика (точка, в которую уже продожен путь)
+	//int coordsPreviousClickY = -1;
 	cocos2d::Vec2 origin;
 	void resetCoordinatesClickAndDeletePath();		// Сбрасывает coordsPreviousClickX и coordsPreviousClickY и удаляет путь, проложенный спрайтами от точки до точки.
+	void GameField::resetCoordinatesClick();
+	void GameField::deletePath();
 public:
 	static cocos2d::Scene* createScene();
 

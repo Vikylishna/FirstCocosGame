@@ -20,24 +20,85 @@ int Field::get_value(int y, int x)
 
 Field::Field()
 {
-	std::ifstream F1;		// Поток для считывания из файла размера поля
-	F1.open("size_field.txt", std::ios::in);
-	F1 >> m;
-	F1 >> n;
-	F1.close();
+	// Заполняем вектора typetilePassable и typetileFilename
+	readFilenamePassable();
+	fillFieldMN();
+	//Проверка.
 
-	std::ifstream F;		// Поток для считывания из файла типов плиток
-	F.open("rectangle_type.txt", std::ios::in);
+/*	CCLOG("typetilePassable.");
+	for (int i = 0; i < typetilePassable.size(); i++)
+		CCLOG("typetile = %u, passable = %u ", i, typetilePassable[i]);
+	CCLOG("typetileFilename");
+	for (int i = 0; i < typetileFilename.size(); i++)
+		CCLOG("typetile = %u, filename = %s ", i, typetileFilename[i].c_str());
+	CCLOG("\n Field.");
+	for (int i = 0; i < m; i++){
+		for (int j = 0; j < n; j++)
+			CCLOG("typetile = %u ", field[i][j]);
+		CCLOG("");
+	}*/
+}
+
+/* Считывает из файла "filenamePassable.txt" имя файла, откуда берется картинка и проходимость плитки с такой картинкой.
+Записывает их в:
+    vector typetilePassable: индекс - тип плитки, значение - проходимость.
+    vector typetileFilename: индекс - тип плитки, значение - имя файла.
+*/
+void Field::readFilenamePassable()
+{
+	std::string path = "filenamePassable.txt";
+	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
+	if (!file)
+	{
+		CCLOG("can not open file %s", path.c_str());
+		return;
+	}
+
+	char fn[40];		// Имя файла должно иметь длину <= 40.
+	int passable = 0;
+
+	int check = 0;		// Проверка корректности чтения.
+	// Считываем все строки из файла.
+	while ((check = fscanf(file, "%s%u", fn, &passable)) != EOF && check == 2) {		// Считали 2 переменные. Если не 2, то до конца не дошли, пишем об этом в лог.
+		// Записываем их в соответствующие vector'а
+		typetilePassable.push_back(passable);
+		std::string tmp(fn);
+		typetileFilename.push_back(tmp);
+	}
+	if (check != -1) CCLOG("Uncorrect data in %s.", path.c_str());		// Если не дошли до конца файла.
+	fclose(file);
+}
+
+/* Заполняет поле: считывает размерность поля из файла "field.txt" в переменные m и n и типы плиток (проходимость) в вектор field.
+1-е число в файле - m (кол-во строк), второе - n (кол-во столбцов), остальные - field
+*/
+void Field::fillFieldMN()
+{
+	std::string path = "field.txt";
+	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
+	if (!file)
+	{
+		CCLOG("can not open file %s", path.c_str());
+		return;
+	}
+	// Считываем размерность
+	if (fscanf(file, "%u", &m) != 1)
+		cocos2d::log("You must fill the file 'field.txt' correct! Wrong m.");
+	if (fscanf(file, "%u", &n) != 1)
+		cocos2d::log("You must fill the file 'field.txt' correct! Wrong n.");
 
 	field.resize(m);
 	// Заполняем поле Field типами плиток
 	for (int i = 0; i < m; i++)
 	{
 		field[i].resize(n);
-		for (int j = 0; (j < n) && (!F.eof()); j++)
-			F >> field[i][j];
+		for (int j = 0; j < n; j++)
+		if (fscanf(file, "%u", &field[i][j]) != 1)		// Если не получилось считать, выводим ошибку в лог.
+		{
+			cocos2d::log("You must fill the file 'field.txt' correct! We need more types of tiles.");
+		}
 	}
-	F.close();
+	fclose(file);
 }
 
 bool Field::check_passible_and_correct(int y, int x)		// Возвращает 1, если клетка ок
@@ -64,8 +125,6 @@ void Field::add_all_adjacent_vertex_in_queue_and_update_path(std::queue<std::pai
 	add_vertex_in_queue_and_update_path(q, path, y - 1, x, y, x);
 	add_vertex_in_queue_and_update_path(q, path, y, x - 1, y, x);
 }
-
-
 
 // Возвращает путь, если он существует (из (y1, x1) в (y2, x2)). Если не существует->пустой вектор.
 // Путь от (y1, x1) к (y2, x2) возвращается в обратном порядке, т.е. от (y2, x2) к (y1, x1)
@@ -99,6 +158,7 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 		// Если все норм., помещаем вершины в очередь и добавляем к ним путь.
 		add_all_adjacent_vertex_in_queue_and_update_path(q, path, current_vertex.first, current_vertex.second);
 	}
+
 	// К этому моменту путь найден.
 	std::vector<std::pair<int, int>> shortest_path;
 	if (flag == 1)		// Если путь есть, построим его по таблице путей.
@@ -137,7 +197,6 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 //	for (int i = 0; i < shortest_path.size(); i++)
 //cocos2d::log("y = %d, x = %d", shortest_path[i].first, shortest_path[i].second);
 
-	//log("current cat x = %d y = %d", 1, 2);
 
 /*	std::ofstream F("test.txt", std::ios::out);
 	for (int i = 0; i < m; i++)
