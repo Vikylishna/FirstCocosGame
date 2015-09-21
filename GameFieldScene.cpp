@@ -52,17 +52,6 @@ bool GameField::init()
 		for (int j = 0; j < gameField.get_n(); j++)		// Проходим столбцы
 		{
 			// gameField.get_value(i, j) - тип текущей плитки.
-	/*		auto sprite = Sprite::create(gameField.getTypetileFilename(gameField.get_value(i, j)));
-			//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
-			double coeff1 = ((double)tileWidth * 1) / ((double)sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
-			double coeff2 = ((double)tileHeight * 1) / ((double)sprite->getBoundingBox().size.height);
-			double coeff = std::min(coeff1, coeff2);
-			sprite->setScale(coeff1);		//Определили и задали требуемый размер.
-
-			sprite->setPosition(origin + Point(tileWidth * j + tileWidth / 2, tileHeight * i + tileHeight / 2));	// Задаем координаты.
-			sprite->setName("tile");		// Назначаем имя.
-			addChild(sprite);*/
-
 			addSprite(gameField.getTypetileFilename(gameField.get_value(i, j)), j, i, 1, "tile");
 		}
 	}
@@ -145,7 +134,7 @@ void GameField::addSprite(const std::string & fn, int coordOfTileX, int coordOfT
 {
 	auto sprite = Sprite::create(fn);
 	//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
-	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getContentSize().width);		//getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getContentSize().width);			//getBoundingBox().size.width);		//getContentSize().height - то же самое
 	double coeff2 = ((double)tileHeight * c) / ((double)sprite->getContentSize().height);		//getBoundingBox().size.height);
 	double coeff = std::min(coeff1, coeff2);
 	sprite->setScale(coeff1);		//Определили и задали требуемый размер.
@@ -173,7 +162,7 @@ void GameField::onMouseUp(Event *event)
 		return;
 	}
 
-	// 3. Если объект с тегом 4 не существует, а это наш персонаж - cat, добавляем его в сцену.
+	// 3. Если объект с именем "player" не существует, а это наш персонаж - cat, добавляем его в сцену.
 	if (this->getChildByName("player") == NULL)
 	{
 		addSprite(filenameOfSprite["player"], coordsCurrentClick.x, coordsCurrentClick.y, 0.75, "player");
@@ -183,7 +172,7 @@ void GameField::onMouseUp(Event *event)
 	// 4. Если координаты нажатой кнопки совпадают с предыдущими (повторное нажатие на одно и то же место), перемещаем персонажа-кота на новое место.
 	if ((coordsCurrentClick.x == coordsPreviousClick.x) && (coordsCurrentClick.y == coordsPreviousClick.y))
 	{
-		// Перемещаем cat_sprite в новую позицию.
+		// Перемещаем player'а в новую позицию.
 		(this->getChildByName("player"))->setPosition((coordsCurrentClick.x * tileWidth + tileWidth / 2), (coordsCurrentClick.y * tileHeight + tileHeight / 2));
 		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
 		resetCoordinatesClickAndDeletePath();

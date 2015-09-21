@@ -3,7 +3,6 @@
 
 #include "cocos2d.h"
 #include "field.h"
-//#include <CCGeometry.h>
 
 template <class T>
 class Coordinates
@@ -35,6 +34,7 @@ private:
 
 	//Длина и ширина плитки (ее размеры).
 	//cocos2d::Size sizetile;
+	Coordinates<int> sizetile;
 	int tileWidth;		// Ширина плитки
 	int tileHeight;		// Длина плитки
 
