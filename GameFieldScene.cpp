@@ -23,35 +23,47 @@ bool GameField::init()
 	}
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	//origin = Director::getInstance()->getVisibleOrigin();
-	origin = Vec2(0, 0);
+	origin = Director::getInstance()->getVisibleOrigin();
+	//origin = Vec2(0, 0);
+
+	fillFilenameOfSpriteFromFile();		// Считываем из файла имена файлов, которые будем использовать для спрайтов.
 
 	// Фон.
-	auto sprite_background = Sprite::create("white_background.jpg", Rect(0, 0, visibleSize.width, visibleSize.height));
+	auto sprite_background = Sprite::create(filenameOfSprite["background"], Rect(0, 0, visibleSize.width, visibleSize.height));
 	sprite_background->setAnchorPoint(Vec2(0, 0));
 	sprite_background->setPosition(origin);// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
-	addChild(sprite_background, 0);
+	addChild(sprite_background);
+
+	gameField.createField();
 
 	/* Длина и ширина одной плитки.
-	 Ширину делим на кол-во столбцов. x
+	 Ширину делим на кол-во столбцов.
 	 Высоту делим на кол-во строк. y */
 	//sizetile.setSize(visibleSize.width / gameField.get_n(), visibleSize.height / gameField.get_m());
-	tileWidth = visibleSize.width / gameField.get_n();	// Ширину делим на кол-во столбцов. x
+	tileWidth = visibleSize.width / gameField.get_n();		// Ширину делим на кол-во столбцов. x
 	tileHeight = visibleSize.height / gameField.get_m();	// Высоту делим на кол-во строк. y
 
 	coordsPreviousClick.x = -1;
 	coordsPreviousClick.y = -1;
 
 	// Заполняем поле игры плитками
-	for (int i = 0; i < gameField.get_m(); i++)		//Проходим строки
+	for (int i = 0; i < gameField.get_m(); i++)		// Проходим строки
 	{
-		for (int j = 0; j < gameField.get_n(); j++)		//Проходим столбцы
+		for (int j = 0; j < gameField.get_n(); j++)		// Проходим столбцы
 		{
 			// gameField.get_value(i, j) - тип текущей плитки.
-			auto sprite1 = Sprite::create(gameField.typetileFilename[gameField.get_value(i, j)], Rect(0, 0, tileWidth - 2, tileHeight - 2));	//("mysprite.png", Rect(0,0,rectWidth,40))
-			sprite1->setAnchorPoint(Vec2(0, 0));
-			sprite1->setPosition(origin + Point(1, 1) + Point(tileWidth * j, tileHeight * i));		//(x - ширина, j - столбец;  y - высота, i - строка)
-			addChild(sprite1, 10);
+	/*		auto sprite = Sprite::create(gameField.getTypetileFilename(gameField.get_value(i, j)));
+			//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
+			double coeff1 = ((double)tileWidth * 1) / ((double)sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
+			double coeff2 = ((double)tileHeight * 1) / ((double)sprite->getBoundingBox().size.height);
+			double coeff = std::min(coeff1, coeff2);
+			sprite->setScale(coeff1);		//Определили и задали требуемый размер.
+
+			sprite->setPosition(origin + Point(tileWidth * j + tileWidth / 2, tileHeight * i + tileHeight / 2));	// Задаем координаты.
+			sprite->setName("tile");		// Назначаем имя.
+			addChild(sprite);*/
+
+			addSprite(gameField.getTypetileFilename(gameField.get_value(i, j)), j, i, 1, "tile");
 		}
 	}
 
@@ -67,6 +79,41 @@ bool GameField::init()
 	return true;
 }
 
+void GameField::insertOneElementInFilenameOfSpriteFromFile(FILE *file, const std::string & path, const std::string & key)
+{
+	char fn[40];		// Имя файла должно иметь длину <= 40.
+	char fake1[40];
+	char fake2[40];
+	int check = 0;		// Проверка корректности чтения.
+
+	// Считываем все строки из файла.
+	if ((check = fscanf(file, "%s%s%s", fake1, fake2, fn)) != EOF && check == 3)
+		filenameOfSprite.insert(std::pair<std::string, std::string>(key, std::string(fn)));
+	else CCLOG("Uncorrect data in %s.", path.c_str());
+}
+
+void GameField::fillFilenameOfSpriteFromFile()
+{
+	//filenameOfSprite;
+	std::string path = "filenameOfSprite.txt";
+	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
+	if (!file)
+	{
+		CCLOG("can not open file %s", path.c_str() );
+		return;
+	}
+
+	insertOneElementInFilenameOfSpriteFromFile(file, path, "background");
+	insertOneElementInFilenameOfSpriteFromFile(file, path, "player");
+	insertOneElementInFilenameOfSpriteFromFile(file, path, "path");
+
+	fclose(file);
+
+	/* Тест.
+	for (auto iter = filenameOfSprite.begin(); iter != filenameOfSprite.end(); iter++)
+		CCLOG("%s %s", iter->first.c_str(), iter->second.c_str()); */
+}
+
 void GameField::resetCoordinatesClick()
 {
 	coordsPreviousClick.x = -1;
@@ -75,14 +122,13 @@ void GameField::resetCoordinatesClick()
 
 void GameField::deletePath()
 {
-//	while (this->getChildByTag(13) != NULL)
-//		this->removeChildByTag(13);
+//	while (this->getChildByName("path") != NULL)
+//		this->removeChildByName("path");
 
 	cocos2d::Vector<Node *> vecChildren = this->getChildren();
-	for (Vector<Node *>::iterator iter = vecChildren.begin(); iter != vecChildren.end(); iter++)
+	for (auto iter = vecChildren.begin(); iter != vecChildren.end(); iter++)
 	{
-		int tag = (*(*iter)).getTag();
-		if (tag == 13)
+		if ((*iter)->getName() == "path")		// Если это часть пути (спрайт пути), удаляем его.
 			this->removeChild(*iter, true);
 	}
 }
@@ -95,17 +141,17 @@ void GameField::resetCoordinatesClickAndDeletePath()
 }
 
 // c - коэффициент. Во сколько раз картинка будет больше плитки.
-void GameField::addSprite(int coordOfTileX, int coordOfTileY, double c, int tag, int zOrder)
+void GameField::addSprite(const std::string & fn, int coordOfTileX, int coordOfTileY, double c, const std::string & spriteName)
 {
-	auto sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
-	//Изменим его: сделаем нужного размера.
-	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
-	double coeff2 = ((double)tileHeight * c) / ((double)sprite->getBoundingBox().size.height);
+	auto sprite = Sprite::create(fn);
+	//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
+	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getContentSize().width);		//getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeff2 = ((double)tileHeight * c) / ((double)sprite->getContentSize().height);		//getBoundingBox().size.height);
 	double coeff = std::min(coeff1, coeff2);
-	sprite->setScale(coeff1);		//Определили и задали требуемый размер
-	sprite->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));	// Задаем координаты.
-	sprite->setTag(tag);		// Назначаем тег
-	addChild(sprite, zOrder);
+	sprite->setScale(coeff1);		//Определили и задали требуемый размер.
+	sprite->setPosition(origin + Point((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2)));	// Задаем координаты.
+	sprite->setName(spriteName);		// Назначаем имя.
+	addChild(sprite);
 }
 
 void GameField::onMouseUp(Event *event)
@@ -113,12 +159,13 @@ void GameField::onMouseUp(Event *event)
 	EventMouse* e = (EventMouse*)event;
 //	Point click = Point(e->getCursorX(), e->getCursorY()) - Director::getInstance()->getVisibleOrigin();
 
-	// 1. Рассчитываем, в какую плитку попали
-	int coordOfTileX = (e->getCursorX() - origin.x) / tileWidth;
-	int coordOfTileY = (e->getCursorY() - origin.y) / tileHeight;
+	// 1. Рассчитываем, в какую плитку попали. Получаем координаты клика по плитке поля gameField.
+	Coordinates<int> coordsCurrentClick;
+	coordsCurrentClick.x = (e->getCursorX() - origin.x) / tileWidth;
+	coordsCurrentClick.y = (e->getCursorY() - origin.y) / tileHeight;
 
 	// 2. Смотрим, проходимая ли она.
-	if (!gameField.check_passible_and_correct(coordOfTileY, coordOfTileX))
+	if (!gameField.checkCorrectAndPassible(coordsCurrentClick.y, coordsCurrentClick.x))
 	{
 		// Плитка непроходимая.
 		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
@@ -127,27 +174,17 @@ void GameField::onMouseUp(Event *event)
 	}
 
 	// 3. Если объект с тегом 4 не существует, а это наш персонаж - cat, добавляем его в сцену.
-	if (this->getChildByTag(4) == NULL)
+	if (this->getChildByName("player") == NULL)
 	{
-/*		auto cat_sprite = Sprite::create("cat.png");	// Добавим спрайт персонажа
-		//Изменим сделаем: сделаем нужного зазмера.
-		double coeff1 = ((double)tileWidth * 0.75) / ((double)cat_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
-		double coeff2 = ((double)tileHeight * 0.75) / ((double)cat_sprite->getBoundingBox().size.height);
-		double coeff = std::min(coeff1, coeff2);
-		cat_sprite->setScale(coeff1);		//Определили и задали требуемый размер
-		cat_sprite->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));		// Помещаем в место клика
-		cat_sprite->setTag(4);		// Назначаем тег 4
-		addChild(cat_sprite, 15);*/
-
-		addSprite(coordOfTileX, coordOfTileY, 0.75, 4, 15);
+		addSprite(filenameOfSprite["player"], coordsCurrentClick.x, coordsCurrentClick.y, 0.75, "player");
 		return;
 	}
 
 	// 4. Если координаты нажатой кнопки совпадают с предыдущими (повторное нажатие на одно и то же место), перемещаем персонажа-кота на новое место.
-	if ((coordOfTileX == coordsPreviousClick.x) && (coordOfTileY == coordsPreviousClick.y))
+	if ((coordsCurrentClick.x == coordsPreviousClick.x) && (coordsCurrentClick.y == coordsPreviousClick.y))
 	{
 		// Перемещаем cat_sprite в новую позицию.
-		(this->getChildByTag(4))->setPosition((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2));
+		(this->getChildByName("player"))->setPosition((coordsCurrentClick.x * tileWidth + tileWidth / 2), (coordsCurrentClick.y * tileHeight + tileHeight / 2));
 		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
 		resetCoordinatesClickAndDeletePath();
 	}
@@ -156,30 +193,20 @@ void GameField::onMouseUp(Event *event)
 	//Сбрасываем предыдущий клик. И удаляем путь, если он есть.
 	resetCoordinatesClickAndDeletePath();
 
-	Vec2 cat_position = (this->getChildByTag(4))->getPosition();		// Получаем текущие координаты кота.
+	Vec2 cat_position = (this->getChildByName("player"))->getPosition();		// Получаем текущие координаты кота.
 	int currentCoordOfTileX = (cat_position.x - origin.x) / tileWidth;
 	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
 
 	// Ищем кратчайший путь
-	std::vector<std::pair<int, int>> shortest_path = gameField.find_the_shortest_path(currentCoordOfTileY, currentCoordOfTileX, coordOfTileY, coordOfTileX);
+	std::vector<std::pair<int, int>> shortest_path = gameField.findTheShortestPath(currentCoordOfTileY, currentCoordOfTileX, coordsCurrentClick.y, coordsCurrentClick.x);
 	if (shortest_path.size() != 0)		// Если путь есть
 	{
-		coordsPreviousClick.x = coordOfTileX;		// Меняем координаты предыдущего клика.
-		coordsPreviousClick.y = coordOfTileY;
+		coordsPreviousClick.x = coordsCurrentClick.x;		// Меняем координаты предыдущего клика.
+		coordsPreviousClick.y = coordsCurrentClick.y;
 		// "Рисуем" путь.
 		for (std::vector<std::pair<int, int>>::size_type i = 0; i < shortest_path.size(); i++)
 		{
-			/*auto path_sprite = Sprite::create("circle.png");	// Спрайт пути.
-			//Изменим сделаем: сделаем нужного зазмера.
-			double coeff1 = ((double)tileWidth * 0.4) / ((double)path_sprite->getBoundingBox().size.width);		//getContentSize().height - то же самое
-			double coeff2 = ((double)tileHeight * 0.4) / ((double)path_sprite->getBoundingBox().size.height);
-			double coeff = std::min(coeff1, coeff2);
-			path_sprite->setScale(coeff1);		//Определили и задали требуемый размер
-			path_sprite->setPosition((shortest_path[i].second * tileWidth + tileWidth / 2), (shortest_path[i].first * tileHeight + tileHeight / 2));		// Помещаем в место клика
-			path_sprite->setTag(13);		// Назначаем тег 13. По нему будем удалять.
-			addChild(path_sprite, 13);*/
-
-			addSprite(shortest_path[i].second, shortest_path[i].first, 0.3, 13, 13);
+			addSprite(filenameOfSprite["path"], shortest_path[i].second, shortest_path[i].first, 0.3, "path");
 		}
 	}
 }

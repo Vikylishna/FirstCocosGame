@@ -3,47 +3,66 @@
 #include <queue>
 #include "cocos2d.h"
 
-int Field::get_m()		// Кол-во плиток в высоту (кол-во строк)
-{
-	return m;
-}
-
-int Field::get_n()		// Кол-во плиток в длину (кол-во столбцов)
-{
-	return n;
-} 
-
-int Field::get_value(int y, int x)
-{
-	return field[y][x];
-}
-
 Field::Field()
+{
+
+}
+
+void Field::createField()
 {
 	// Заполняем вектора typetilePassable и typetileFilename
 	readFilenamePassable();
 	fillFieldMN();
 	//Проверка.
 
-/*	CCLOG("typetilePassable.");
+	/*	CCLOG("typetilePassable.");
 	for (int i = 0; i < typetilePassable.size(); i++)
-		CCLOG("typetile = %u, passable = %u ", i, typetilePassable[i]);
+	CCLOG("typetile = %u, passable = %u ", i, typetilePassable[i]);
 	CCLOG("typetileFilename");
 	for (int i = 0; i < typetileFilename.size(); i++)
-		CCLOG("typetile = %u, filename = %s ", i, typetileFilename[i].c_str());
+	CCLOG("typetile = %u, filename = %s ", i, typetileFilename[i].c_str());
 	CCLOG("\n Field.");
 	for (int i = 0; i < m; i++){
-		for (int j = 0; j < n; j++)
-			CCLOG("typetile = %u ", field[i][j]);
-		CCLOG("");
+	for (int j = 0; j < n; j++)
+	CCLOG("typetile = %u ", field[i][j]);
+	CCLOG("");
 	}*/
+}
+
+/* Кол-во плиток в высоту (кол-во строк) */
+int Field::get_m()
+{
+	return m;
+}
+
+/* Кол-во плиток в длину (кол-во столбцов) */
+int Field::get_n()
+{
+	return n;
+}
+
+/* Возвращает значение field[y][x]. */
+int Field::get_value(int y, int x)
+{
+	return field[y][x];
+}
+
+/* Возвращает значение typetilePassable[i]. */
+int Field::getTypetilePassable(int i)
+{
+	return typetilePassable[i];
+}
+
+/* Возвращает значение typetileFilename[i]. */
+std::string Field::getTypetileFilename(int i)
+{
+	return typetileFilename[i];
 }
 
 /* Считывает из файла "filenamePassable.txt" имя файла, откуда берется картинка и проходимость плитки с такой картинкой.
 Записывает их в:
     vector typetilePassable: индекс - тип плитки, значение - проходимость.
-    vector typetileFilename: индекс - тип плитки, значение - имя файла.
-*/
+    vector typetileFilename: индекс - тип плитки, значение - имя файла. */
 void Field::readFilenamePassable()
 {
 	std::string path = "filenamePassable.txt";
@@ -101,16 +120,29 @@ void Field::fillFieldMN()
 	fclose(file);
 }
 
-bool Field::check_passible_and_correct(int y, int x)		// Возвращает 1, если клетка ок
+/* Проверяет клетку на проходимость. */
+bool Field::checkPassible(int y, int x)
 {
-	return (y >= 0 && y < m && x >= 0 && x < n && field[y][x] != 2 && field[y][x] != 3) ? true : false;
+	return typetilePassable[field[y][x]];
 }
 
-// Если все норм., помещаем вершины в очередь и добавляем к ним путь.
-void Field::add_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x)
+/* Проверяет клетку на то, что она имеет годные координаты. */
+bool Field::checkCorrect(int y, int x)
 {
-	// Смотрим, чтобы добавляемые в очередь вершины были: проходимы, непросмотрены.
-	if (check_passible_and_correct(new_y, new_x) && path[new_y][new_x] == -1)
+	return (y >= 0 && y < m && x >= 0 && x < n) ? true : false;
+}
+
+/* Возвращает 1, если клетка ок. */
+bool Field::checkCorrectAndPassible(int y, int x)
+{
+	return (checkCorrect(y, x) && checkPassible(y, x)) ? true : false;
+}
+
+/* Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
+void Field::addVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x)
+{
+	// Смотрим, чтобы добавляемые в очередь вершины были: проходимы, непросмотрены и существовали.
+	if (checkCorrectAndPassible(new_y, new_x) && path[new_y][new_x] == -1)
 	{
 		q.push(std::pair<int, int>(new_y, new_x));		// Помещаем вершину в очередь.
 		path[new_y][new_x] = path[old_y][old_x] + 1;	// [old_y][old_x] - откуда пришли.
@@ -118,17 +150,17 @@ void Field::add_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> 
 }
 
 // Проходится по всем вмежным с (x, y) вершинам, кладет их в очередь и добавляет к ним путь.
-void Field::add_all_adjacent_vertex_in_queue_and_update_path(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int y, int x)
+void Field::AddAllAdjacentVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int y, int x)
 {
-	add_vertex_in_queue_and_update_path(q, path, y + 1, x, y, x);		// Обходим все смежные с (x, y) вершины по часовой стрелке.
-	add_vertex_in_queue_and_update_path(q, path, y, x + 1, y, x);
-	add_vertex_in_queue_and_update_path(q, path, y - 1, x, y, x);
-	add_vertex_in_queue_and_update_path(q, path, y, x - 1, y, x);
+	addVertexInQueueAndUpdatePath(q, path, y + 1, x, y, x);		// Обходим все смежные с (x, y) вершины по часовой стрелке.
+	addVertexInQueueAndUpdatePath(q, path, y, x + 1, y, x);
+	addVertexInQueueAndUpdatePath(q, path, y - 1, x, y, x);
+	addVertexInQueueAndUpdatePath(q, path, y, x - 1, y, x);
 }
 
 // Возвращает путь, если он существует (из (y1, x1) в (y2, x2)). Если не существует->пустой вектор.
 // Путь от (y1, x1) к (y2, x2) возвращается в обратном порядке, т.е. от (y2, x2) к (y1, x1)
-std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, int y2, int x2)
+std::vector<std::pair<int, int>> Field::findTheShortestPath(int y1, int x1, int y2, int x2)
 {
 	// Вектор путей. Каждая ячейка содержит длину пути. Если (значение в этой ячейке == -1) -> эта ячейка еще не посещена.
 	std::vector<std::vector<int>> path(m);
@@ -146,7 +178,7 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 	{
 		std::pair<int, int> current_vertex = q.front();		// Извлекаем из очереди вершину (текущая вершина)
 
-		// Если мы встретили "конечную, требуемую" вершину. Путь найден. Вершина находится наверху стека.
+		// Если мы встретили "конечную, требуемую" вершину. Путь найден. Вершина находится наверху очереди.
 		if (current_vertex.first == y2 && current_vertex.second == x2)
 		{
 			flag = 1;
@@ -154,51 +186,46 @@ std::vector<std::pair<int, int>> Field::find_the_shortest_path(int y1, int x1, i
 		}
 		q.pop();
 
-		// Просматриваем все смежные с текущей вершиной вершины ( <= 4 ) и смотрим, чтобы они были: проходимы, непросмотрены.
-		// Если все норм., помещаем вершины в очередь и добавляем к ним путь.
-		add_all_adjacent_vertex_in_queue_and_update_path(q, path, current_vertex.first, current_vertex.second);
+		/* Просматриваем все смежные с текущей вершиной вершины ( <= 4 ) и смотрим, чтобы они были: проходимы, непросмотрены.
+		Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
+		AddAllAdjacentVertexInQueueAndUpdatePath(q, path, current_vertex.first, current_vertex.second);
 	}
 
 	// К этому моменту путь найден.
+	// Ищем его в матрице путей.
 	std::vector<std::pair<int, int>> shortest_path;
 	if (flag == 1)		// Если путь есть, построим его по таблице путей.
 	{
 		int x = x2, y = y2;		// Координаты конца пути.
-		int current = path[y][x];
+		int current = path[y][x];	// Чиселка - текущее значение пути, сколько осталось клеток до достижения цели - конечной точки.
 		while (current != 0)
 		{
 			shortest_path.push_back(std::pair<int, int>(y, x));		// Записываем последнюю точку пути в вектор shortest_path
-			// Ищем предыдущую точку пути. Точку, значение в которой == current - 1
-			if ((y + 1 >= 0) && (y + 1 < m) && (path[y + 1][x] == current - 1))
-			{
+			// Ищем предыдущую точку пути. Точку, значение в которой == current - 1. Проверяем окрестность точки, в которой находимся.
+			if (checkCorrect(y + 1, x) && (path[y + 1][x] == current - 1))
 				y++;
-				//current--;
-			}
-			else if ((x + 1 >= 0) && (x + 1 < n) && (path[y][x + 1] == current - 1))
-			{
+
+			else if (checkCorrect(y, x + 1) && (path[y][x + 1] == current - 1))
 				x++;
-				//current--;
-			}
-			else if ((y - 1 >= 0) && (y - 1 < m) && (path[y - 1][x] == current - 1))
-			{
+
+			else if (checkCorrect(y - 1, x) && (path[y - 1][x] == current - 1))
 				y--;
-				//current--;
-			}
-			else if ((x - 1 >= 0) && (x - 1 < n) && (path[y][x - 1] == current - 1))
-			{
+
+			else if (checkCorrect(y, x - 1) && (path[y][x - 1] == current - 1))
 				x--;
-				//current--;
-			}
+
 			// Нашли точку.
-			current = path[y][x];		// Сохраняем новую длину пути.
+			current = path[y][x];		// Сохраняем новую длину пути. То же самое, что current--
 		}
-		shortest_path.push_back(std::pair<int, int>(y1, x1));		// Заталкиваем последнюю.
+		//shortest_path.push_back(std::pair<int, int>(y1, x1));		// Заталкиваем последнюю точку. Не нужна: на ней кот.
 	}
+
+// Тест, вывод пути.
 //	for (int i = 0; i < shortest_path.size(); i++)
 //cocos2d::log("y = %d, x = %d", shortest_path[i].first, shortest_path[i].second);
 
-
-/*	std::ofstream F("test.txt", std::ios::out);
+/*	Тест, вывод матрицы путей.
+std::ofstream F("test.txt", std::ios::out);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
