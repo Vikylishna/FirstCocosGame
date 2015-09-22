@@ -20,9 +20,9 @@ public:
 	Field();
 	void createField();		// Создает поле: загружает его из файла, формирует из файла массивы typetilePassable и typetileFilename.
 
-	int get_m();			// Кол-во плиток в высоту (кол-во строк)
-	int get_n();			// Кол-во плиток в длину (кол-во столбцов)
-	int get_value(int y, int x);	// Возвращает значение field[y][x]
+	int getRowNums();				// Кол-во плиток в высоту (кол-во строк)
+	int getColumnNums();			// Кол-во плиток в длину (кол-во столбцов)
+	int getValue(int y, int x);		// Возвращает значение field[y][x]
 
 	int getTypetilePassable(int i);	// Возвращает значение typetilePassable[i].
 	std::string getTypetileFilename(int i);	// Возвращает значение typetileFilename[i].
@@ -43,8 +43,10 @@ private:
 	void readFilenamePassable();			// Считывает из файла "filenamePassable.txt" имя файла, откуда берется картинка и проходимость.
 	void fillFieldMN();		// Заполняет поле: считывает размерность поля из файла "field.txt" в переменные m и n и типы плиток (проходимость) в вектор field.
 
+	void addVertexInQueue(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x);
+	void updatePath(std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x);
 	void addVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x);
-	void AddAllAdjacentVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int y, int x);
+	void goToAllAdjacentVertices(std::queue<std::pair<int, int>> & q, std::vector < std::vector<int>> & path, int y, int x);
 };
 
 #endif /* FIELD_H */

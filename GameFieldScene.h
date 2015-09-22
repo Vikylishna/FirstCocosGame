@@ -32,11 +32,9 @@ public:
 private:
 	Field gameField;
 
-	//Длина и ширина плитки (ее размеры).
+	//Длина и ширина плитки (ее размеры). x - длина, y - ширина.
 	//cocos2d::Size sizetile;
 	Coordinates<int> sizetile;
-	int tileWidth;		// Ширина плитки
-	int tileHeight;		// Длина плитки
 
 	// Координаты предыдущего клика (точка, в которую уже проложен путь). Координаты поля gameField.
 	Coordinates<int> coordsPreviousClick;
@@ -48,10 +46,10 @@ private:
 	2 - имя файла с картинкой игрока,
 	3 - имя файла с картинкой пути. */
 	std::map<std::string, std::string> filenameOfSprite;
-	void insertOneElementInFilenameOfSpriteFromFile(FILE *file, const std::string & path, const std::string & key);
+	void insertOneElementInFilenameOfSpriteFromFile(FILE *file, const std::string & path, const std::string & key);		// Для метода fillFilenameOfSpriteFromFile
 	void fillFilenameOfSpriteFromFile();		// Считывает из файла filenameOfSprite.txt в filenameOfSprite имена файлов.
 
-	void resetCoordinatesClickAndDeletePath();		// Сбрасывает coordsPreviousClickX и coordsPreviousClickY и удаляет путь, проложенный спрайтами от точки до точки.
+	void resetCoordinatesClickAndDeletePath();		// Сбрасывает coordsPreviousClick.x и coordsPreviousClick.y и удаляет путь, проложенный спрайтами от точки до точки.
 	void resetCoordinatesClick();
 	void deletePath();
 

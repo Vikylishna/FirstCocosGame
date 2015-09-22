@@ -30,19 +30,19 @@ void Field::createField()
 }
 
 /* Кол-во плиток в высоту (кол-во строк) */
-int Field::get_m()
+int Field::getRowNums()
 {
 	return m;
 }
 
 /* Кол-во плиток в длину (кол-во столбцов) */
-int Field::get_n()
+int Field::getColumnNums()
 {
 	return n;
 }
 
 /* Возвращает значение field[y][x]. */
-int Field::get_value(int y, int x)
+int Field::getValue(int y, int x)
 {
 	return field[y][x];
 }
@@ -139,18 +139,34 @@ bool Field::checkCorrectAndPassible(int y, int x)
 }
 
 /* Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
-void Field::addVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x)
+void Field::addVertexInQueue(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x)
 {
 	// Смотрим, чтобы добавляемые в очередь вершины были: проходимы, непросмотрены и существовали.
 	if (checkCorrectAndPassible(new_y, new_x) && path[new_y][new_x] == -1)
 	{
 		q.push(std::pair<int, int>(new_y, new_x));		// Помещаем вершину в очередь.
+	}
+}
+
+/* Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
+void Field::updatePath(std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x)
+{
+	// Смотрим, чтобы добавляемые в очередь вершины были: проходимы, непросмотрены и существовали.
+	if (checkCorrectAndPassible(new_y, new_x) && path[new_y][new_x] == -1)
+	{
 		path[new_y][new_x] = path[old_y][old_x] + 1;	// [old_y][old_x] - откуда пришли.
 	}
 }
 
+/* Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
+void Field::addVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int new_y, int new_x, int old_y, int old_x)
+{
+	addVertexInQueue(q, path, new_y, new_x);
+	updatePath(path, new_y, new_x, old_y, old_x);
+}
+
 // Проходится по всем вмежным с (x, y) вершинам, кладет их в очередь и добавляет к ним путь.
-void Field::AddAllAdjacentVertexInQueueAndUpdatePath(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int y, int x)
+void Field::goToAllAdjacentVertices(std::queue<std::pair<int, int>> & q, std::vector< std::vector<int>> & path, int y, int x)
 {
 	addVertexInQueueAndUpdatePath(q, path, y + 1, x, y, x);		// Обходим все смежные с (x, y) вершины по часовой стрелке.
 	addVertexInQueueAndUpdatePath(q, path, y, x + 1, y, x);
@@ -188,7 +204,7 @@ std::vector<std::pair<int, int>> Field::findTheShortestPath(int y1, int x1, int 
 
 		/* Просматриваем все смежные с текущей вершиной вершины ( <= 4 ) и смотрим, чтобы они были: проходимы, непросмотрены.
 		Если все норм., помещаем вершины в очередь и добавляем к ним путь. */
-		AddAllAdjacentVertexInQueueAndUpdatePath(q, path, current_vertex.first, current_vertex.second);
+		goToAllAdjacentVertices(q, path, current_vertex.first, current_vertex.second);
 	}
 
 	// К этому моменту путь найден.

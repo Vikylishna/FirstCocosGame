@@ -39,20 +39,20 @@ bool GameField::init()
 	/* Длина и ширина одной плитки.
 	 Ширину делим на кол-во столбцов.
 	 Высоту делим на кол-во строк. y */
-	//sizetile.setSize(visibleSize.width / gameField.get_n(), visibleSize.height / gameField.get_m());
-	tileWidth = visibleSize.width / gameField.get_n();		// Ширину делим на кол-во столбцов. x
-	tileHeight = visibleSize.height / gameField.get_m();	// Высоту делим на кол-во строк. y
+	//sizetile.setSize(visibleSize.width / gameField.getColumnNums(), visibleSize.height / gameField.getRowNums());
+	sizetile.x = visibleSize.width / gameField.getColumnNums();		// Ширину делим на кол-во столбцов. x
+	sizetile.y = visibleSize.height / gameField.getRowNums();	// Высоту делим на кол-во строк. y
 
 	coordsPreviousClick.x = -1;
 	coordsPreviousClick.y = -1;
 
 	// Заполняем поле игры плитками
-	for (int i = 0; i < gameField.get_m(); i++)		// Проходим строки
+	for (int i = 0; i < gameField.getRowNums(); i++)		// Проходим строки
 	{
-		for (int j = 0; j < gameField.get_n(); j++)		// Проходим столбцы
+		for (int j = 0; j < gameField.getColumnNums(); j++)		// Проходим столбцы
 		{
-			// gameField.get_value(i, j) - тип текущей плитки.
-			addSprite(gameField.getTypetileFilename(gameField.get_value(i, j)), j, i, 1, "tile");
+			// gameField.getValue(i, j) - тип текущей плитки.
+			addSprite(gameField.getTypetileFilename(gameField.getValue(i, j)), j, i, 1, "tile");
 		}
 	}
 
@@ -134,11 +134,11 @@ void GameField::addSprite(const std::string & fn, int coordOfTileX, int coordOfT
 {
 	auto sprite = Sprite::create(fn);
 	//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
-	double coeff1 = ((double)tileWidth * c) / ((double)sprite->getContentSize().width);			//getBoundingBox().size.width);		//getContentSize().height - то же самое
-	double coeff2 = ((double)tileHeight * c) / ((double)sprite->getContentSize().height);		//getBoundingBox().size.height);
+	double coeff1 = ((double)sizetile.x * c) / ((double)sprite->getContentSize().width);			//getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeff2 = ((double)sizetile.y * c) / ((double)sprite->getContentSize().height);		//getBoundingBox().size.height);
 	double coeff = std::min(coeff1, coeff2);
 	sprite->setScale(coeff1);		//Определили и задали требуемый размер.
-	sprite->setPosition(origin + Point((coordOfTileX * tileWidth + tileWidth / 2), (coordOfTileY * tileHeight + tileHeight / 2)));	// Задаем координаты.
+	sprite->setPosition(origin + Point((coordOfTileX * sizetile.x + sizetile.x / 2), (coordOfTileY * sizetile.y + sizetile.y / 2)));	// Задаем координаты.
 	sprite->setName(spriteName);		// Назначаем имя.
 	addChild(sprite);
 }
@@ -150,8 +150,8 @@ void GameField::onMouseUp(Event *event)
 
 	// 1. Рассчитываем, в какую плитку попали. Получаем координаты клика по плитке поля gameField.
 	Coordinates<int> coordsCurrentClick;
-	coordsCurrentClick.x = (e->getCursorX() - origin.x) / tileWidth;
-	coordsCurrentClick.y = (e->getCursorY() - origin.y) / tileHeight;
+	coordsCurrentClick.x = (e->getCursorX() - origin.x) / sizetile.x;
+	coordsCurrentClick.y = (e->getCursorY() - origin.y) / sizetile.y;
 
 	// 2. Смотрим, проходимая ли она.
 	if (!gameField.checkCorrectAndPassible(coordsCurrentClick.y, coordsCurrentClick.x))
@@ -173,7 +173,7 @@ void GameField::onMouseUp(Event *event)
 	if ((coordsCurrentClick.x == coordsPreviousClick.x) && (coordsCurrentClick.y == coordsPreviousClick.y))
 	{
 		// Перемещаем player'а в новую позицию.
-		(this->getChildByName("player"))->setPosition((coordsCurrentClick.x * tileWidth + tileWidth / 2), (coordsCurrentClick.y * tileHeight + tileHeight / 2));
+		(this->getChildByName("player"))->setPosition((coordsCurrentClick.x * sizetile.x + sizetile.x / 2), (coordsCurrentClick.y * sizetile.y + sizetile.y / 2));
 		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
 		resetCoordinatesClickAndDeletePath();
 	}
@@ -183,8 +183,8 @@ void GameField::onMouseUp(Event *event)
 	resetCoordinatesClickAndDeletePath();
 
 	Vec2 cat_position = (this->getChildByName("player"))->getPosition();		// Получаем текущие координаты кота.
-	int currentCoordOfTileX = (cat_position.x - origin.x) / tileWidth;
-	int currentCoordOfTileY = (cat_position.y - origin.y) / tileHeight;
+	int currentCoordOfTileX = (cat_position.x - origin.x) / sizetile.x;
+	int currentCoordOfTileY = (cat_position.y - origin.y) / sizetile.y;
 
 	// Ищем кратчайший путь
 	std::vector<std::pair<int, int>> shortest_path = gameField.findTheShortestPath(currentCoordOfTileY, currentCoordOfTileX, coordsCurrentClick.y, coordsCurrentClick.x);
