@@ -39,7 +39,6 @@ bool GameField::init()
 	/* Длина и ширина одной плитки.
 	 Ширину делим на кол-во столбцов.
 	 Высоту делим на кол-во строк. y */
-	//sizetile.setSize(visibleSize.width / gameField.getColumnNums(), visibleSize.height / gameField.getRowNums());
 	sizetile.x = visibleSize.width / gameField.getColumnNums();		// Ширину делим на кол-во столбцов. x
 	sizetile.y = visibleSize.height / gameField.getRowNums();	// Высоту делим на кол-во строк. y
 
@@ -63,11 +62,18 @@ bool GameField::init()
 	///  Touch
 	///
 	///////////////////////////////////////////////////////////////////
-/*
-	auto mouse_listener = EventListenerMouse::create();
-	mouse_listener->onMouseUp = CC_CALLBACK_1(GameField::onMouseUp, this);
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouse_listener, this);
-*/
+
+//	auto mouse_listener = EventListenerMouse::create();
+//	mouse_listener->onMouseUp = CC_CALLBACK_1(GameField::onMouseUp, this);
+//	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+
+	auto touch_listener = EventListenerTouchOneByOne::create();
+	touch_listener->setSwallowTouches(true);
+	touch_listener->onTouchBegan = CC_CALLBACK_2(GameField::onTouchBegan, this);
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touch_listener, this);
+	//isTouching = false;
+	//touchPosition = 0;
+
 	return true;
 }
 
@@ -160,15 +166,88 @@ void GameField::addSprite(const std::string & fn, int coordOfTileX, int coordOfT
 {
 	auto sprite = Sprite::create(fn);
 	//Изменим спрайт: сделаем нужного размера. Подгоним к размеру плитки.
-	double coeff1 = ((double)sizetile.x * c) / ((double)sprite->getContentSize().width);			//getBoundingBox().size.width);		//getContentSize().height - то же самое
-	double coeff2 = ((double)sizetile.y * c) / ((double)sprite->getContentSize().height);		//getBoundingBox().size.height);
-	double coeff = std::min(coeff1, coeff2);
-	sprite->setScale(coeff1);		//Определили и задали требуемый размер.
+	double coeffX = ((double)sizetile.x * c) / ((double)sprite->getContentSize().width);			//getBoundingBox().size.width);		//getContentSize().height - то же самое
+	double coeffY = ((double)sizetile.y * c) / ((double)sprite->getContentSize().height);			//getBoundingBox().size.height);
+	//double coeff = std::min(coeffX, coeffY);
+	//sprite->setScale(coeff1);		//Определили и задали требуемый размер.
+	sprite->setScaleX(coeffX);
+	sprite->setScaleY(coeffY);
+
 	sprite->setPosition(origin + Point((coordOfTileX * sizetile.x + sizetile.x / 2), (coordOfTileY * sizetile.y + sizetile.y / 2)));	// Задаем координаты.
 	sprite->setName(spriteName);		// Назначаем имя.
 	addChild(sprite);
 }
 
+/*void GameField::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event * event)
+{
+	//isTouching = false;
+}*/
+
+bool GameField::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event * event)
+{
+	//touchPosition = touch->getLocation().x;
+	//EventMouse* e = (EventMouse*)event;
+	//	Point click = Point(e->getCursorX(), e->getCursorY()) - Director::getInstance()->getVisibleOrigin();
+
+	// 1. Рассчитываем, в какую плитку попали. Получаем координаты клика по плитке поля gameField.
+	Coordinates<int> coordsCurrentClick;
+	coordsCurrentClick.x = (touch->getLocation().x - origin.x) / sizetile.x;
+	coordsCurrentClick.y = (touch->getLocation().y - origin.y) / sizetile.y;
+
+	// 2. Смотрим, проходимая ли она.
+	if (!gameField.checkCorrectAndPassible(coordsCurrentClick.y, coordsCurrentClick.x))
+	{
+		// Плитка непроходимая.
+		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
+		resetCoordinatesClickAndDeletePath();
+		return true;
+	}
+
+	// 3. Если объект с именем "player" не существует, а это наш персонаж - cat, добавляем его в сцену.
+	if (this->getChildByName("player") == NULL)
+	{
+		addSprite(filenameOfSprite["player"], coordsCurrentClick.x, coordsCurrentClick.y, 0.75, "player");
+		return true;
+	}
+
+	// 4. Если координаты нажатой кнопки совпадают с предыдущими (повторное нажатие на одно и то же место), перемещаем персонажа-кота на новое место.
+	if ((coordsCurrentClick.x == coordsPreviousClick.x) && (coordsCurrentClick.y == coordsPreviousClick.y))
+	{
+		// Перемещаем player'а в новую позицию.
+		(this->getChildByName("player"))->setPosition(origin + Point((coordsCurrentClick.x * sizetile.x + sizetile.x / 2), (coordsCurrentClick.y * sizetile.y + sizetile.y / 2)));
+		
+		//sprite->setPosition(origin + Point((coordOfTileX * sizetile.x + sizetile.x / 2), (coordOfTileY * sizetile.y + sizetile.y / 2)));	// Задаем координаты.
+
+		//Сбрасываем координаты предыдущего клика. И удаляем путь, если он есть.
+		resetCoordinatesClickAndDeletePath();
+	}
+
+	// 5. Если координаты не совпадают с предыдущими, ищем путь и показываем его игроку.
+	//Сбрасываем предыдущий клик. И удаляем путь, если он есть.
+	resetCoordinatesClickAndDeletePath();
+
+	Vec2 cat_position = (this->getChildByName("player"))->getPosition();		// Получаем текущие координаты кота.
+	int currentCoordOfTileX = (cat_position.x - origin.x) / sizetile.x;
+	int currentCoordOfTileY = (cat_position.y - origin.y) / sizetile.y;
+
+	// Ищем кратчайший путь
+	std::vector<std::pair<int, int>> shortest_path = gameField.findTheShortestPath(currentCoordOfTileY, currentCoordOfTileX, coordsCurrentClick.y, coordsCurrentClick.x);
+	if (shortest_path.size() != 0)		// Если путь есть
+	{
+		coordsPreviousClick.x = coordsCurrentClick.x;		// Меняем координаты предыдущего клика.
+		coordsPreviousClick.y = coordsCurrentClick.y;
+		// "Рисуем" путь.
+		for (std::vector<std::pair<int, int>>::size_type i = 0; i < shortest_path.size(); i++)
+		{
+			addSprite(filenameOfSprite["path"], shortest_path[i].second, shortest_path[i].first, 0.3, "path");
+		}
+	}
+	return true;
+}
+
+
+
+/*
 void GameField::onMouseUp(Event *event)
 {
 	EventMouse* e = (EventMouse*)event;
@@ -224,4 +303,4 @@ void GameField::onMouseUp(Event *event)
 			addSprite(filenameOfSprite["path"], shortest_path[i].second, shortest_path[i].first, 0.3, "path");
 		}
 	}
-}
+}*/
