@@ -46,8 +46,8 @@ private:
 	2 - имя файла с картинкой игрока,
 	3 - имя файла с картинкой пути. */
 	std::map<std::string, std::string> filenameOfSprite;
-	void insertOneElementInFilenameOfSpriteFromFile(FILE *file, const std::string & path, const std::string & key);		// Для метода fillFilenameOfSpriteFromFile
-	void fillFilenameOfSpriteFromFile();		// Считывает из файла filenameOfSprite.txt в filenameOfSprite имена файлов.
+	void insertOneElementInFilenameOfSpriteFromString(const char * & fileContents, const std::string & fullPath, const std::string & key);		// Для метода fillFilenameOfSpriteFromFile
+	void fillFilenameOfSpriteFromFile();		// Считывает из файла filenameOfSprite.txt в map filenameOfSprite имена файлов.
 
 	void resetCoordinatesClickAndDeletePath();		// Сбрасывает coordsPreviousClick.x и coordsPreviousClick.y и удаляет путь, проложенный спрайтами от точки до точки.
 	void resetCoordinatesClick();

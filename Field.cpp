@@ -2,6 +2,8 @@
 #include <fstream>
 #include <queue>
 #include "cocos2d.h"
+#include <CCFileUtils.h>
+#include <cctype>
 
 Field::Field()
 {
@@ -14,17 +16,26 @@ void Field::createField()
 	readFilenamePassable();
 	fillFieldMN();
 	//Проверка.
+/*	CCLOG("m = %u, n = %u ", m, n);
+	for (int i = 0; i < m; i++){
+		for (int j = 0; j < n; j++)
+			CCLOG("%u", field[i][j]);
+		CCLOG("");
+	}
+	CCLOG("CUCCESS");*/
 
-	/*	CCLOG("typetilePassable.");
+/*	CCLOG("typetilePassable.");
 	for (int i = 0; i < typetilePassable.size(); i++)
-	CCLOG("typetile = %u, passable = %u ", i, typetilePassable[i]);
+		CCLOG("typetile = %u, passable = %u ", i, typetilePassable[i]);
+
 	CCLOG("typetileFilename");
 	for (int i = 0; i < typetileFilename.size(); i++)
-	CCLOG("typetile = %u, filename = %s ", i, typetileFilename[i].c_str());
-	CCLOG("\n Field.");
+		CCLOG("typetile = %u, filename = %s ", i, typetileFilename[i].c_str());
+
+/*	CCLOG("\n Field.");
 	for (int i = 0; i < m; i++){
-	for (int j = 0; j < n; j++)
-	CCLOG("typetile = %u ", field[i][j]);
+		for (int j = 0; j < n; j++)
+			CCLOG("typetile = %u ", field[i][j]);
 	CCLOG("");
 	}*/
 }
@@ -59,12 +70,90 @@ std::string Field::getTypetileFilename(int i)
 	return typetileFilename[i];
 }
 
+// Считывает число из строки в num, двигает указатель за это число.
+bool Field::readNumber(const char* & fileContentsBegin, int & num)
+{
+	while (!(isdigit(*fileContentsBegin)) && (*fileContentsBegin) != '\0')		// Пропускаем символы до тех пор, пока не встретим цифру.
+	{
+		fileContentsBegin++;
+	}
+
+	int check = sscanf(fileContentsBegin, "%u", &num);	// Считали цифру.
+	//CCLOG("num = %u check = %u", num, check);
+
+	while (isdigit(*fileContentsBegin))		// Пропускаем все цифры до тех пор, пока не встретим не цифру.
+	{
+		fileContentsBegin++;
+	}
+	return (check == 1) ? 1 : 0;
+}
+
+/* Считывает строку до пробела из строки, двигает указатель за считанную строку. */
+bool Field::readString(const char* & fileContentsBegin, char * str)
+{
+	while ((*fileContentsBegin) != '\0' && !(isalpha(*fileContentsBegin)))		// Пропускаем символы до тех пор, пока не встретим букву либо конец строки.
+	{
+		fileContentsBegin++;
+	}
+
+	int check = sscanf(fileContentsBegin, "%s", str);		// Считали слово.
+	//CCLOG("str = %s check = %u", str, check);
+
+	while ((*fileContentsBegin) != '\0' && (*fileContentsBegin) != ' ')					// Пропускаем все буквы, которые считали.(до пробела либо до конца строки)
+	{
+		fileContentsBegin++;
+	}
+	return (check == 1) ? 1 : 0;
+}
+
 /* Считывает из файла "filenamePassable.txt" имя файла, откуда берется картинка и проходимость плитки с такой картинкой.
 Записывает их в:
-    vector typetilePassable: индекс - тип плитки, значение - проходимость.
-    vector typetileFilename: индекс - тип плитки, значение - имя файла. */
+vector typetilePassable: индекс - тип плитки, значение - проходимость.
+vector typetileFilename: индекс - тип плитки, значение - имя файла. */
 void Field::readFilenamePassable()
 {
+	std::string path = "filenamePassable.txt";
+	//ssize_t fileSize = 0;		// Размер содержимого файла, который мы будем читать.
+
+	// Получаем полный путь к файлу.
+	std::string fullPath = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(path.c_str());
+
+	// Если файл не существует.
+	if (!cocos2d::CCFileUtils::sharedFileUtils()->isFileExist(fullPath))
+	{
+		CCLOG("File %s not exists.", path.c_str());
+		return;
+	}
+
+	// Считываем содержимое из файла. При неудаче возвращает NULL.
+	//unsigned char * fileContents = cocos2d::CCFileUtils::sharedFileUtils()->getFileData(fullPath.c_str(), "r", &fileSize);
+	//unsigned char * fileContentsBegin = fileContents;		// Указатель, кот. будем менять.
+	std::string fileContents = cocos2d::CCFileUtils::sharedFileUtils()->getStringFromFile(fullPath.c_str());
+	const char * fileContentsBegin = fileContents.c_str();	// Указатель, которым будем пробегаться по строке.
+
+	//std::string filename;
+	int passable = 0;
+	char filename[80];		// Имя файла должно иметь длину <= 80.
+
+	// Считываем все строки из файла. Записываем их в соответствующие vector'а.
+	while (*fileContentsBegin != '\0') {
+		readString(fileContentsBegin, filename);		// Считываем имя файла.
+		bool check = readNumber(fileContentsBegin, passable);		// Считываем число - проходимость.
+		std::string tmp(filename);
+		if (tmp.size() > 0 && check)		// Если считываение прошло успешно, добавляем данные в вектора.
+		{
+			typetileFilename.push_back(tmp);
+			typetilePassable.push_back(passable);
+		}
+	}
+
+	//CCLOG("MY STRING %s", fn);
+	//filenameOfSprite.insert(std::pair<std::string, std::string>(key, std::string(fn)));		// Вставка в мэп.
+
+	//delete[] fileContents;
+
+	/////////////////////////////////////////
+/*
 	std::string path = "filenamePassable.txt";
 	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
 	if (!file)
@@ -86,6 +175,7 @@ void Field::readFilenamePassable()
 	}
 	if (check != -1) CCLOG("Uncorrect data in %s.", path.c_str());		// Если не дошли до конца файла.
 	fclose(file);
+	*/
 }
 
 /* Заполняет поле: считывает размерность поля из файла "field.txt" в переменные m и n и типы плиток (проходимость) в вектор field.
@@ -94,30 +184,39 @@ void Field::readFilenamePassable()
 void Field::fillFieldMN()
 {
 	std::string path = "field.txt";
-	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
-	if (!file)
+	//ssize_t fileSize = 0;		// Размер содержимого файла, который мы будем читать.
+
+	// Получаем полный путь к файлу.
+	std::string fullPath = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(path.c_str());
+
+	// Если файл не существует.
+	if (!cocos2d::CCFileUtils::sharedFileUtils()->isFileExist(fullPath))
 	{
-		CCLOG("can not open file %s", path.c_str());
+		CCLOG("File %s not exists.", path.c_str());
 		return;
 	}
-	// Считываем размерность
-	if (fscanf(file, "%u", &m) != 1)
-		cocos2d::log("You must fill the file 'field.txt' correct! Wrong m.");
-	if (fscanf(file, "%u", &n) != 1)
-		cocos2d::log("You must fill the file 'field.txt' correct! Wrong n.");
 
+	// Считываем содержимое из файла.
+	//unsigned char * fileContents = cocos2d::CCFileUtils::sharedFileUtils()->getFileData(fullPath.c_str(), "r", &fileSize);
+	//char * fileContentsBegin = (char *)fileContents;		// Указатель, кот. будем менять.
+	std::string fileContents = cocos2d::CCFileUtils::sharedFileUtils()->getStringFromFile(fullPath.c_str());
+	const char * fileContentsBegin = fileContents.c_str();	// Указатель, которым будем пробегаться по строке.
+
+
+	if (!readNumber(fileContentsBegin, m))
+		cocos2d::log("You must fill the file 'field.txt' correct! Wrong m.");
+	if (!readNumber(fileContentsBegin, n))
+		cocos2d::log("You must fill the file 'field.txt' correct! Wrong n.");
 	field.resize(m);
 	// Заполняем поле Field типами плиток
 	for (int i = 0; i < m; i++)
 	{
 		field[i].resize(n);
 		for (int j = 0; j < n; j++)
-		if (fscanf(file, "%u", &field[i][j]) != 1)		// Если не получилось считать, выводим ошибку в лог.
-		{
-			cocos2d::log("You must fill the file 'field.txt' correct! We need more types of tiles.");
-		}
+			readNumber(fileContentsBegin, field[i][j]);
 	}
-	fclose(file);
+
+	//delete[] fileContents;
 }
 
 /* Проверяет клетку на проходимость. */

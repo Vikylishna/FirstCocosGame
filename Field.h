@@ -20,8 +20,8 @@ public:
 	Field();
 	void createField();		// Создает поле: загружает его из файла, формирует из файла массивы typetilePassable и typetileFilename.
 
-	int getRowNums();				// Кол-во плиток в высоту (кол-во строк)
-	int getColumnNums();			// Кол-во плиток в длину (кол-во столбцов)
+	int getRowNums();				// Кол-во плиток в высоту (кол-во строк). m
+	int getColumnNums();			// Кол-во плиток в длину (кол-во столбцов). n
 	int getValue(int y, int x);		// Возвращает значение field[y][x]
 
 	int getTypetilePassable(int i);	// Возвращает значение typetilePassable[i].
@@ -40,6 +40,8 @@ private:
 	int n;		// Кол-во столбцов.
 	std::vector<std::vector<int>> field;	// Вектор, содержащий типы плиток поля (typeTile).
 	
+	bool readString(const char* & fileContentsBegin, char * str);		// Считывает строку до пробела из строки, двигает указатель за считанную строку.
+	bool readNumber(const char* & fileContentsBegin, int & num);		// Считывает число из строки, двигает указатель за это число.
 	void readFilenamePassable();			// Считывает из файла "filenamePassable.txt" имя файла, откуда берется картинка и проходимость.
 	void fillFieldMN();		// Заполняет поле: считывает размерность поля из файла "field.txt" в переменные m и n и типы плиток (проходимость) в вектор field.
 

@@ -1,6 +1,7 @@
 #include "GameFieldScene.h"
 #include <string>
 #include <algorithm>
+#include <CCFileUtils.h>
 
 USING_NS_CC;
 
@@ -24,14 +25,13 @@ bool GameField::init()
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
-	//origin = Vec2(0, 0);
 
-	fillFilenameOfSpriteFromFile();		// Считываем из файла имена файлов, которые будем использовать для спрайтов.
+	// Считываем из файла имена файлов, которые будем использовать для спрайтов.
+	fillFilenameOfSpriteFromFile();
 
 	// Фон.
-	auto sprite_background = Sprite::create(filenameOfSprite["background"], Rect(0, 0, visibleSize.width, visibleSize.height));
-	sprite_background->setAnchorPoint(Vec2(0, 0));
-	sprite_background->setPosition(origin);// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
+	auto sprite_background = Sprite::create(filenameOfSprite["background"], Rect(0, 0, visibleSize.width, visibleSize.height));	//"whiteBackground.jpg"
+	sprite_background->setPosition(origin + visibleSize/2);		// +Point(visibleSize.width / 2, visibleSize.height / 2));	// +Point(-80, 80));
 	addChild(sprite_background);
 
 	gameField.createField();
@@ -56,47 +56,73 @@ bool GameField::init()
 		}
 	}
 
+
+
 	///////////////////////////////////////////////////////////////////
 	///
 	///  Touch
 	///
 	///////////////////////////////////////////////////////////////////
-
+/*
 	auto mouse_listener = EventListenerMouse::create();
 	mouse_listener->onMouseUp = CC_CALLBACK_1(GameField::onMouseUp, this);
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouse_listener, this);
+*/
 	return true;
 }
 
-void GameField::insertOneElementInFilenameOfSpriteFromFile(FILE *file, const std::string & path, const std::string & key)
+// Функция заполнения мэпа. key - ключ. Значение считывается из строки, которую считали из файла.
+// Имена файлов должны быть < 50 символов.
+void GameField::insertOneElementInFilenameOfSpriteFromString(const char * & fileContentsBegin, const std::string & fullPath, const std::string & key)
 {
-	char fn[40];		// Имя файла должно иметь длину <= 40.
-	char fake1[40];
-	char fake2[40];
-	int check = 0;		// Проверка корректности чтения.
+	char fn[50];		// Имя файла должно иметь длину <= 50.
 
-	// Считываем все строки из файла.
-	if ((check = fscanf(file, "%s%s%s", fake1, fake2, fn)) != EOF && check == 3)
-		filenameOfSprite.insert(std::pair<std::string, std::string>(key, std::string(fn)));
-	else CCLOG("Uncorrect data in %s.", path.c_str());
+	while ((*fileContentsBegin) != 61 && (*fileContentsBegin) != '\0')		// Пропускаем непотребные символы.
+	{
+		fileContentsBegin++;
+	}
+	fileContentsBegin++;		// пропускаем '='
+	fileContentsBegin++;		// пропускаем после "=" 1 символ (пробел).
+	int i = 0;
+	while (*fileContentsBegin != ' ' && *fileContentsBegin != '\0')		// Считываем имя файла до пробела.
+	{
+		fn[i] = *fileContentsBegin;
+		fileContentsBegin++;
+		i++;
+	}
+	fn[i] = '\0';
+	//CCLOG("MY STRING %s", fn);
+	filenameOfSprite.insert(std::pair<std::string, std::string>(key, std::string(fn)));		// Вставка в мэп.
 }
 
 void GameField::fillFilenameOfSpriteFromFile()
 {
-	//filenameOfSprite;
 	std::string path = "filenameOfSprite.txt";
-	FILE *file = fopen(path.c_str(), "r");		// Открываем файл для чтения.
-	if (!file)
+	ssize_t fileSize = 0;		// Размер содержимого файла, который мы будем читать.
+
+	// Получаем полный путь к файлу.
+	std::string fullPath = CCFileUtils::sharedFileUtils()->fullPathForFilename(path.c_str());
+
+	// Если файл не существует.
+	if (!CCFileUtils::sharedFileUtils()->isFileExist(fullPath))
 	{
-		CCLOG("can not open file %s", path.c_str() );
+		CCLOG("File %s not exists.", path.c_str());
+
 		return;
 	}
 
-	insertOneElementInFilenameOfSpriteFromFile(file, path, "background");
-	insertOneElementInFilenameOfSpriteFromFile(file, path, "player");
-	insertOneElementInFilenameOfSpriteFromFile(file, path, "path");
+	// Считываем содержимое из файла.
+	//unsigned char * fileContents = CCFileUtils::sharedFileUtils()->getFileData(fullPath.c_str(), "r", &fileSize);
+	//unsigned char * fileContentsBegin = fileContents;
 
-	fclose(file);
+	std::string fileContents = CCFileUtils::sharedFileUtils()->getStringFromFile(fullPath.c_str());
+	const char * fileContentsBegin = fileContents.c_str();		// Указатель, которым будем ходить по строке.
+
+	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "background");
+	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "player");
+	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "path");
+
+	//delete[] fileContents;
 
 	/* Тест.
 	for (auto iter = filenameOfSprite.begin(); iter != filenameOfSprite.end(); iter++)
