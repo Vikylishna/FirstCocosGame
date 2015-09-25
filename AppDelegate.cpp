@@ -45,7 +45,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 #else
 		//Тут надо сделать в соотвекствии с размером экрана.
 		glview = GLViewImpl::create("MyGame");  //-//-//-//
-		//glview = GLViewImpl::createWithRect("SimpleGame", Rect(0, 0, 480, 320), 1.0);
+		//glview = GLViewImpl::createWithRect("MyGame", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #endif
         director->setOpenGLView(glview);
     }

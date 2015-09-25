@@ -29,8 +29,6 @@ public:
 
 	bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event * event);
 
-//	void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event * event);
-
 	CREATE_FUNC(GameField);	// implement the "static create()" method manually
 
 private:

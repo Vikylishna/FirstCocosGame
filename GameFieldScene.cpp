@@ -17,7 +17,7 @@ Scene* GameField::createScene()
 bool GameField::init()
 {
 	//////////////////////////////
-	// 1. super init first
+	// Слой.
 	if (!Layer::init())
 	{
 		return false;
@@ -71,8 +71,6 @@ bool GameField::init()
 	touch_listener->setSwallowTouches(true);
 	touch_listener->onTouchBegan = CC_CALLBACK_2(GameField::onTouchBegan, this);
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touch_listener, this);
-	//isTouching = false;
-	//touchPosition = 0;
 
 	return true;
 }
@@ -118,17 +116,12 @@ void GameField::fillFilenameOfSpriteFromFile()
 	}
 
 	// Считываем содержимое из файла.
-	//unsigned char * fileContents = CCFileUtils::sharedFileUtils()->getFileData(fullPath.c_str(), "r", &fileSize);
-	//unsigned char * fileContentsBegin = fileContents;
-
 	std::string fileContents = CCFileUtils::sharedFileUtils()->getStringFromFile(fullPath.c_str());
 	const char * fileContentsBegin = fileContents.c_str();		// Указатель, которым будем ходить по строке.
 
 	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "background");
 	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "player");
 	insertOneElementInFilenameOfSpriteFromString(fileContentsBegin, fullPath, "path");
-
-	//delete[] fileContents;
 
 	/* Тест.
 	for (auto iter = filenameOfSprite.begin(); iter != filenameOfSprite.end(); iter++)
@@ -178,17 +171,8 @@ void GameField::addSprite(const std::string & fn, int coordOfTileX, int coordOfT
 	addChild(sprite);
 }
 
-/*void GameField::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event * event)
-{
-	//isTouching = false;
-}*/
-
 bool GameField::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event * event)
 {
-	//touchPosition = touch->getLocation().x;
-	//EventMouse* e = (EventMouse*)event;
-	//	Point click = Point(e->getCursorX(), e->getCursorY()) - Director::getInstance()->getVisibleOrigin();
-
 	// 1. Рассчитываем, в какую плитку попали. Получаем координаты клика по плитке поля gameField.
 	Coordinates<int> coordsCurrentClick;
 	coordsCurrentClick.x = (touch->getLocation().x - origin.x) / sizetile.x;
